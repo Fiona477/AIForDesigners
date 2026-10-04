@@ -1,340 +1,518 @@
-# Prague School of Design Poster Generator
-## Handoff Instructions
-
-## Purpose
-
-This handoff coordinates the poster generation workflow.
-
-Its responsibility is to:
-
-1. Gather user content.
-2. Convert content into structured design parameters.
-3. Invoke the Prague School of Design Poster Generator skill.
-4. Evaluate the generated output.
-5. Request revisions when necessary.
-
-The handoff should never directly create the poster layout.
-
-The handoff is responsible only for orchestration and quality control.
+# HANDOFF.md
+# Experimental Typographic Poster Generator
+# AI Production Workflow
 
 ---
 
-# Workflow
+# PURPOSE
 
-## Step 1: Collect User Input
+This workflow guides the generation of posters inspired by:
 
-Request the following information:
+- Swiss International Typographic Style
+- Experimental typography
+- Deconstructed letterforms
+- Modular graphic systems
 
-### Required
+The role of the AI is not to imitate an existing poster exactly.
 
-- Poster title
-- Event name
-- Date
-- Venue or location
+The role of the AI is to:
 
-### Optional
+1. Extract visual principles
+2. Follow the design system defined in SKILLS.md
+3. Generate new compositions
+4. Evaluate those compositions against objective criteria
+5. Refine the output through iteration
 
-- Subtitle
-- Institution name
-- Website URL
-- Speaker names
-- Description
-- Theme keywords
+The final result should feel inspired by the source while remaining original.
+
+---
+
+# SYSTEM ARCHITECTURE
+
+The workflow is divided into four stages.
+
+Stage 01
+Analysis
+
+↓
+
+Stage 02
+Layout Planning
+
+↓
+
+Stage 03
+Poster Generation
+
+↓
+
+Stage 04
+Evaluation & Revision
+
+---
+
+# STAGE 01
+# VISUAL ANALYSIS
+
+## Objective
+
+Understand the source poster before generating new work.
+
+The AI should identify:
+
+### Typography
+
+- typeface category
+- weight distribution
+- hierarchy
+- alignment system
+- legibility strategy
+
+### Geometry
+
+- dominant shapes
+- repeated forms
+- shape relationships
+- scale variation
+
+### Composition
+
+- focal points
+- reading path
+- positive/negative space
+- overall density
+
+### Color
+
+- palette
+- contrast level
+- color distribution
+
+---
+
+## Required Output
+
+Generate a concise design summary.
 
 Example:
 
-Title:
-Future of Typography
-
-Date:
-12–15.03.27
-
-Venue:
-Design Institute Prague
-
-Institution:
-School of Visual Communication
-
-Keywords:
-experimental, architectural, modular
+Dominant oversized semicircular forms create rhythm across a
+12-column grid. Information is embedded within abstract
+typography. Large black geometric elements contrast against a
+light background. Visual hierarchy relies primarily on scale.
 
 ---
 
-# Step 2: Convert User Input Into Design Data
+# STAGE 02
+# LAYOUT PLANNING
 
-Transform raw text into structured parameters.
+## Objective
+
+Construct the design system before generating visuals.
+
+The AI should determine:
+
+### Grid
+
+- column count
+- row structure
+- margins
+- gutters
+
+### Hierarchy
+
+Level 1:
+Primary title
+
+Level 2:
+Dates and event information
+
+Level 3:
+Supporting metadata
+
+Level 4:
+Micro information
+
+---
+
+### Visual Density Map
+
+Define:
+
+High Density Zones
+
+Medium Density Zones
+
+Low Density Zones
 
 Example:
 
-{
-  "title": "Future of Typography",
-  "date": "12–15.03.27",
-  "institution": "School of Visual Communication",
-  "venue": "Design Institute Prague",
-  "keywords": [
-    "experimental",
-    "architectural",
-    "modular"
-  ]
-}
+Top:
+High
+
+Middle:
+Medium
+
+Bottom:
+High
 
 ---
 
-# Step 3: Define Poster Configuration
+### Shape Plan
 
-Establish generation settings.
+Determine:
 
-Default Configuration:
+- number of circles
+- number of arcs
+- number of bars
+- number of rings
+- cropped elements
 
-{
-  "style": "Prague School Experimental Typography",
-  "orientation": "portrait",
-  "palette": "black_white",
-  "density": "high",
-  "abstraction_level": 0.8,
-  "grid_visibility": 0.2,
-  "variation_seed": "random"
-}
-
-Parameter Definitions:
-
-abstraction_level
-
-0.0 = purely informational
-
-1.0 = highly abstract
-
-Recommended:
-0.7–0.9
+Create a predicted composition map.
 
 ---
 
-density
+## Required Output
 
-low
-medium
-high
+Produce a layout specification document before visual generation.
 
-Recommended:
-high
+No rendering begins until layout planning is complete.
 
 ---
 
-grid_visibility
+# STAGE 03
+# POSTER GENERATION
 
-0.0 = invisible grid
+## Objective
 
-1.0 = visibly rigid grid
-
-Recommended:
-0.2–0.3
+Build composition according to SKILLS.md rules.
 
 ---
 
-# Step 4: Invoke Poster Generator Skill
+## Generation Priorities
 
-Pass the following package to the skill:
+Priority 01
 
-{
-  "content": {
-    "title": "...",
-    "date": "...",
-    "institution": "...",
-    "venue": "..."
-  },
+Grid Integrity
 
-  "settings": {
-    "density": "high",
-    "abstraction_level": 0.8
-  }
-}
+Never violate the grid intentionally.
 
-Invoke:
+---
 
-Prague School Poster Generator Skill
+Priority 02
 
-The generator is responsible for:
+Hierarchy
 
-- Composition
-- Geometry
-- Typography
+One dominant focal point.
+
+---
+
+Priority 03
+
+Legibility
+
+Critical information must remain readable.
+
+---
+
+Priority 04
+
+Visual Tension
+
+Introduce contrast through:
+
+- scale
+- cropping
+- density
+- repetition
+
+---
+
+Priority 05
+
+Originality
+
+Avoid direct copying.
+
+Generate new spatial relationships.
+
+---
+
+# FORM GENERATION
+
+Allowed Forms:
+
+- circles
+- semicircles
+- arcs
+- rings
+- bars
+- rectangles
+- typographic fragments
+
+---
+
+Forbidden Forms:
+
+- photographs
+- illustrations
+- icons
+- gradients
+- decorative ornaments
+- textures
+
+---
+
+# TYPOGRAPHIC TREATMENT
+
+Typography may function as:
+
+1. Information
+
+or
+
+2. Geometry
+
+Large text may be:
+
+- cropped
+- fragmented
+- layered
+
+Small text should remain readable.
+
+---
+
+# COLOR APPLICATION
+
+Use SKILLS.md palette.
+
+Default:
+
+Background:
+Off-white
+
+Forms:
+Black
+
+Text:
+Black
+
+Optional accent:
+One accent color only.
+
+Accent usage must remain below five percent.
+
+---
+
+# STAGE 04
+# EVALUATION
+
+## Objective
+
+Measure visual quality against objective criteria.
+
+Avoid subjective reactions such as:
+
+- "looks cool"
+- "feels interesting"
+- "seems modern"
+
+Evaluation must be rule-based.
+
+---
+
+# EVALUATION RUBRIC
+
+Score each category from 1–10.
+
+---
+
+## Grid Compliance
+
+Questions:
+
+- Does alignment follow the column grid?
+- Do elements snap to structural boundaries?
+
+Score:
+1–10
+
+---
+
+## Hierarchy Clarity
+
+Questions:
+
+- Is there a clear focal point?
+- Can the eye navigate the composition?
+
+Score:
+1–10
+
+---
+
+## Scale Contrast
+
+Questions:
+
+- Are large and small elements clearly differentiated?
+- Is there sufficient visual tension?
+
+Score:
+1–10
+
+---
+
+## Typographic Integration
+
+Questions:
+
+- Do letters operate as graphic forms?
+- Does type contribute to structure?
+
+Score:
+1–10
+
+---
+
+## Density Control
+
+Questions:
+
+- Are dense areas balanced by breathing room?
+- Does composition avoid uniform noise?
+
+Score:
+1–10
+
+---
+
+## Legibility
+
+Questions:
+
+- Is the essential information readable?
+- Can event details be located quickly?
+
+Score:
+1–10
+
+---
+
+## Originality
+
+Questions:
+
+- Is the design derived from principles rather than copied?
+- Does the composition create new relationships?
+
+Score:
+1–10
+
+---
+
+# SUCCESS THRESHOLD
+
+Minimum acceptable score:
+
+8/10
+
+for:
+
+- Grid Compliance
 - Hierarchy
-- Layout
+- Scale Contrast
+- Legibility
+
+If any category falls below 8:
+
+Return the design for revision.
 
 ---
 
-# Step 5: Evaluate Output
+# REVISION LOOP
 
-After generation, score the poster.
+If score < 8:
 
-Use a 1–5 rating scale.
+Identify:
 
----
+1. Problem
+2. Cause
+3. Proposed Fix
 
-## Composition Score
+Example:
 
-Questions:
+Problem:
+Weak focal point
 
-- Is there a clear visual hierarchy?
-- Are focal points established?
-- Does the eye move naturally through the page?
+Cause:
+Oversized ring competes with title
 
-Score:
+Fix:
+Reduce ring scale by 25%
+Increase title scale by 20%
 
-1–5
+Regenerate composition.
 
----
-
-## Rhythm Score
-
-Questions:
-
-- Are geometric elements repeated effectively?
-- Does the composition feel cohesive?
-
-Score:
-
-1–5
+Repeat evaluation.
 
 ---
 
-## Contrast Score
+# OUTPUT FORMAT
 
-Questions:
+Before generation, always produce:
 
-- Is there variation in scale?
-- Is there balance between dense and open spaces?
+## Design Summary
 
-Score:
-
-1–5
+Brief description of intended poster.
 
 ---
 
-## Legibility Score
+## Layout Plan
 
-Questions:
-
-- Is essential information readable?
-- Is text overwhelmed by abstract forms?
-
-Score:
-
-1–5
+- Grid
+- Hierarchy
+- Density map
+- Shape inventory
 
 ---
 
-## Originality Score
+## Generation Prompt
 
-Questions:
-
-- Does the design avoid copying the reference poster?
-- Does it produce a unique arrangement?
-
-Score:
-
-1–5
+Structured production prompt.
 
 ---
 
-# Step 6: Acceptance Criteria
+## Evaluation Report
 
-Accept the poster if:
+Scores for:
 
-Composition ≥ 4
-
-Rhythm ≥ 4
-
-Contrast ≥ 4
-
-Legibility ≥ 3
-
-Originality ≥ 4
-
-If all conditions are satisfied:
-
-STATUS = APPROVED
-
-Otherwise:
-
-STATUS = REVISION REQUIRED
+- Grid
+- Hierarchy
+- Contrast
+- Typography
+- Density
+- Legibility
+- Originality
 
 ---
 
-# Step 7: Revision Strategy
+# FINAL GOAL
 
-If composition is weak:
+The finished poster should demonstrate:
 
-Increase:
+- Swiss structural discipline
+- algorithmic consistency
+- modular systems
+- typographic experimentation
+- controlled visual complexity
 
-- vertical bar count
-- major arc size
+The viewer should recognize a rational grid framework beneath an
+apparently chaotic field of large geometric forms and fragmented
+typography.
 
-Reduce:
+The design must feel engineered rather than expressive.
 
-- empty areas
-
----
-
-If rhythm is weak:
-
-Increase:
-
-- repetition of arc modules
-- repetition of fragment clusters
-
----
-
-If legibility is weak:
-
-Increase:
-
-- text size
-- whitespace around information
-
-Reduce:
-
-- overlap near text blocks
-
----
-
-If originality is weak:
-
-Randomize:
-
-- arc placement
-- scale hierarchy
-- focal-point locations
-
-Avoid direct recreation of the source work.
-
----
-
-# Educational Purpose
-
-This project is intended to teach:
-
-- AI orchestration
-- Prompt decomposition
-- Skill-based generation
-- Design systems thinking
-- Evaluation of generative outputs
-
-The goal is not to reproduce an existing poster.
-
-The goal is to generate original posters that apply the same formal design principles.
-
----
-
-# Success Condition
-
-The generated poster should:
-
-- Feel like contemporary design-school communication.
-- Balance order and chaos.
-- Use typography as image.
-- Maintain a clear visual hierarchy.
-- Produce unique results on every generation.
-- Demonstrate principles of Swiss modernism and experimental typographic design.
-
-If these conditions are met, the workflow is successful.
+Structure first.
+Experiment second.
