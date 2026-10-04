@@ -1,412 +1,621 @@
-# Prague School of Design Poster Generator
+# SKILLS.md
+# Experimental Typographic Poster Generator
+# Design System Specification
 
 ## Purpose
 
-Generate experimental typographic posters inspired by the structural and visual principles of the Prague School of Design poster (2015). The generator should not create exact copies. Instead, it should produce original compositions that recreate the poster's visual language through systematic placement of geometric forms, modular typography, spatial rhythm, and controlled abstraction.
+Generate poster layouts inspired by experimental typographic design that merges principles of the Swiss International Typographic Style with large-scale abstract letterform deconstruction.
 
-The output should feel like a contemporary design-school exhibition poster that exists somewhere between typography, graphic design, and abstract art.
+The generator prioritizes:
 
----
+1. Structural grid discipline
+2. Typographic hierarchy
+3. Geometric consistency
+4. Controlled visual complexity
+5. Legibility of essential information
+6. High contrast and spatial tension
+7. Modular systems over decoration
 
-# Design Objective
+Visual output should feel:
 
-Create a poster that:
+- bold
+- architectural
+- intellectual
+- systematic
+- typographic
+- experimental
+- contemporary
 
-- Uses typography as both information and graphic form.
-- Prioritizes visual exploration over immediate readability.
-- Combines Swiss grid discipline with experimental deconstruction.
-- Employs a limited black-and-white color palette.
-- Generates dense compositions of geometric fragments and oversized forms.
-- Balances legibility and abstraction.
-
-The final poster should feel:
-
-- Modern
-- Intellectual
-- Experimental
-- Systematic
-- Architectural
-- Typographic
+The poster should never feel illustrative, decorative, expressive, or handmade.
 
 ---
 
-# Visual Language
+# GRID SYSTEM
 
-## Color Palette
+## Canvas
 
-Background:
+Portrait orientation.
 
-- White (#FFFFFF)
-- Light Gray (#F2F2F2)
+Preferred ratio:
 
-Foreground:
+Width: 100
+Height: 141
 
-- Black (#000000)
+Equivalent formats:
 
-Rules:
+- A0 Portrait
+- A1 Portrait
+- A2 Portrait
+- A3 Portrait
 
-- No gradients.
-- No shadows.
-- No transparency.
-- No additional colors unless explicitly requested.
+All measurements should scale proportionally.
 
 ---
 
-# Composition Structure
+## Primary Grid
 
-Divide the poster into three visual regions:
+12-column modular grid.
 
-### Zone A (Top)
+Columns:
+
+12
+
+Column width:
+
+Equal width.
+
+Gutters:
+
+1.5% of total poster width.
+
+Margins:
+
+Top: 6%
+Bottom: 6%
+Left: 6%
+Right: 6%
+
+Grid should remain visible conceptually even when obscured by oversized forms.
+
+All major elements must align to grid columns.
+
+---
+
+## Secondary Modular Grid
+
+Rows:
+
+18
+
+Used for:
+
+- date placement
+- metadata
+- institutional information
+- supporting text
+
+Row spacing should remain constant throughout the composition.
+
+---
+
+## Alignment Rule
+
+All information must snap to either:
+
+- column edges
+- row intersections
+- major geometric form edges
+
+Never float content freely.
+
+Every object must appear intentionally positioned.
+
+---
+
+# COMPOSITIONAL STRUCTURE
+
+## Visual Zones
+
+Divide poster into three zones:
+
+### Zone A
+Upper third
 
 Purpose:
 
-- High visual energy.
-- Complex arrangements.
-- Dense abstract forms.
+High density
 
-Contents:
+Contains:
 
-- Large semicircles.
-- Thick vertical bars.
-- Fragmented glyph clusters.
-- One diagonal element.
+- large abstract forms
+- fragmented typographic structures
+- visual tension
 
-Density:
+Density target:
 
-- High
+80%
 
 ---
 
-### Zone B (Middle)
+### Zone B
+Middle third
 
 Purpose:
 
-- Visual pause.
-- Information anchor.
+Visual pause
 
-Contents:
+Contains:
 
-- Date information.
-- Large circular ring element.
-- Moderate negative space.
+- primary metadata
+- date
+- circular anchor shape
 
-Density:
+Density target:
 
-- Medium
+50%
 
 ---
 
-### Zone C (Bottom)
+### Zone C
+Lower third
 
 Purpose:
 
-- Final visual destination.
-- Largest textual information.
+Resolution
 
-Contents:
+Contains:
 
-- Oversized curved forms.
-- Additional glyph fragments.
-- Large institutional title.
+- largest text block
+- institutional information
+- final geometric structures
 
-Density:
+Density target:
 
-- High
-
----
-
-# Geometric Components
-
-## 1. Semicircle Module
-
-Description:
-
-Heavy circular strokes forming:
-
-- C-shapes
-- U-shapes
-- Open circles
-- Rotated arcs
-
-Parameters:
-
-- Diameter: 120–400 px
-- Stroke Thickness: 20–80 px
-- Rotation: Any angle
-
-Behavior:
-
-- May overlap.
-- Should create visual rhythm.
-- Functions as both type and shape.
-
-Priority:
-
-Very High
+75%
 
 ---
 
-## 2. Ring Module
+# TYPOGRAPHY
 
-Description:
+## Typeface Category
 
-Large complete circular outline.
+Primary:
 
-Parameters:
+Neo-grotesque sans serif.
 
-- Diameter: 180–350 px
-- Stroke Thickness: 30–80 px
+Recommended references:
 
-Behavior:
+- Helvetica
+- Univers
+- Akzidenz-Grotesk
+- Suisse Intl
+- Inter
 
-- Serves as focal point.
-- Appears only 1–2 times.
+No serif fonts.
 
-Priority:
+No script fonts.
 
-High
-
----
-
-## 3. Vertical Bar Module
-
-Description:
-
-Solid rectangular forms.
-
-Parameters:
-
-- Width: 20–70 px
-- Height: 100–600 px
-
-Behavior:
-
-- Used along edges.
-- Creates architectural framework.
-- Balances curved shapes.
-
-Priority:
-
-High
+No display fonts.
 
 ---
 
-## 4. Diagonal Bar Module
+## Typographic Personality
 
-Description:
+Typography should feel:
 
-Single angled rectangle.
+- objective
+- neutral
+- engineered
+- precise
 
-Parameters:
+Typography is treated as both:
 
-- Rotation: 25–60 degrees
-- Thickness comparable to major arcs.
+1. language
+2. geometry
 
-Behavior:
+Letterforms may transition into abstract shapes.
 
-- Creates tension.
-- Interrupts grid structure.
+---
 
-Frequency:
+# TYPE SCALE
 
-1 per composition.
+Base unit = 8px
 
-Priority:
+Scale ratio = 1.333
+
+Sizes:
+
+8
+11
+16
+21
+28
+37
+49
+65
+87
+116
+155
+207
+276
+
+Use only these values.
+
+No arbitrary scaling.
+
+---
+
+# TYPOGRAPHIC HIERARCHY
+
+## Level 1
+
+Large Institutional Title
+
+Examples:
+
+Prague School of Design
+
+Size:
+
+155–276
+
+Weight:
+
+Black
+
+Case:
+
+Lowercase preferred
+
+Tracking:
+
+-20 to -60
+
+Occupies:
+
+4–8 columns
+
+Purpose:
+
+Final visual destination.
+
+Occurs once.
+
+---
+
+## Level 2
+
+Event Information
+
+Examples:
+
+Date range
+
+Size:
+
+37–65
+
+Weight:
 
 Medium
 
----
+Tracking:
 
-## 5. Fragment Cluster Module
+0
 
-Description:
+Purpose:
 
-Small collections of:
+Primary readable information.
 
-- Partial circles
-- Arc fragments
-- Dashes
-- Short lines
-- Rectangles
-- Symbol-like constructions
-
-Behavior:
-
-- Resemble deconstructed typography.
-- Create texture.
-- Encourage close inspection.
-
-Quantity:
-
-3–8 clusters.
-
-Priority:
-
-High
+Must remain completely legible.
 
 ---
 
-# Typography
+## Level 3
 
-## Typeface
+Supporting Metadata
 
-Use a neutral sans-serif style.
+Size:
 
-Examples:
+16–28
 
-- Helvetica
-- Inter
-- Univers
-- Neue Haas Grotesk
+Weight:
 
-Characteristics:
+Regular
 
-- Geometric
-- Clean
-- Functional
-- Minimal
+Purpose:
+
+Contextual information.
 
 ---
 
-## Text Hierarchy
+## Level 4
 
-### Primary Text
+Micro Information
 
-Examples:
+Size:
 
-- Design School
-- Exhibition
-- Visual Systems
-- Experimental Typography
+8–11
 
-Properties:
+Weight:
 
-- Largest readable text.
-- Positioned near bottom.
+Regular
 
----
+Purpose:
 
-### Secondary Text
+Supplemental content.
 
-Examples:
-
-- School or organization name.
-- Event information.
-
-Properties:
-
-- Medium scale.
-- Integrated into composition.
+Should reward close inspection.
 
 ---
 
-### Tertiary Text
+# HIERARCHY RULES
 
-Examples:
+## Rule 1
 
-- Dates
-- Locations
-- URLs
+One dominant element only.
 
-Properties:
-
-- Most readable.
-- Anchors composition.
+There may only be one visual focal point.
 
 ---
 
-# Grid Logic
+## Rule 2
 
-Underlying Structure:
+Hierarchy through scale.
 
-Use a hidden Swiss-inspired grid.
-
-Grid Characteristics:
-
-- 4–8 columns
-- Consistent margins
-- Asymmetrical placements
-
-Rules:
-
-- Elements may intentionally break grid boundaries.
-- Major forms should still align with invisible structural axes.
+Do not create hierarchy using color.
 
 ---
 
-# Density Rules
+## Rule 3
 
-Visual density should vary.
+Hierarchy through density.
 
-Target:
-
-- 70% occupied surface area.
-- 30% negative space.
-
-Avoid:
-
-- Uniform spacing.
-- Perfect symmetry.
-- Empty compositions.
+Dense regions should surround important information.
 
 ---
 
-# Generative Behaviors
+## Rule 4
 
-When generating layouts:
+Readable information should occupy less than 25% of total composition.
 
-1. Place architectural bars first.
-2. Add major semicircle forms.
-3. Add ring focal element.
-4. Insert diagonal interruption.
-5. Place readable text.
-6. Add fragment clusters.
-7. Refine balance between positive and negative space.
+Abstract structure should occupy more than 75%.
 
 ---
 
-# Evaluation Criteria
+## Rule 5
 
-A successful poster should satisfy:
+Large text blocks must align with major geometric forms.
 
-## Structure
+---
 
-- Strong visual hierarchy.
-- Multiple focal points.
-- Clear compositional flow.
+# ABSTRACT TYPOGRAPHIC SYSTEM
 
-## Rhythm
+## Letterform Deconstruction
 
-- Repetition of geometric forms.
-- Consistent visual language.
-- Scale variation.
+Transform typography into:
+
+- circles
+- semicircles
+- quarter circles
+- vertical bars
+- rings
+- arcs
+- fragments
+
+Characters should appear partially hidden.
+
+Viewer should infer language rather than read everything immediately.
+
+---
+
+## Shape Vocabulary
+
+Allowed shapes:
+
+- circle
+- semicircle
+- ring
+- square
+- rectangle
+- bar
+- arc
+- line
+
+Not allowed:
+
+- organic shapes
+- illustrations
+- icons
+- photographs
+
+---
+
+## Shape Scale Distribution
+
+10% small
+
+30% medium
+
+60% large
+
+The composition should be dominated by oversized forms.
+
+---
+
+# SPACING SYSTEM
+
+Base spacing unit:
+
+8
+
+Allowed spacing:
+
+8
+16
+24
+32
+48
+64
+96
+128
+
+Everything should conform to these increments.
+
+---
+
+## Negative Space
+
+Negative space is structural.
+
+Do not treat empty areas as leftovers.
+
+Every empty region should contribute to:
+
+- rhythm
+- tension
+- contrast
+
+---
+
+## Density Rule
+
+No area larger than 20% of the canvas should remain visually inactive.
+
+---
+
+# COLOR SYSTEM
+
+## Primary Palette
+
+Background:
+
+#F4F4F1
+
+Primary Forms:
+
+#000000
+
+Text:
+
+#000000
+
+---
 
 ## Contrast
 
-- Large vs small.
-- Dense vs open.
-- Legible vs abstract.
+Extreme contrast preferred.
 
-## Legibility
+Minimum contrast ratio:
 
-- Essential information remains readable.
-- Abstract elements never completely obscure text.
-
-## Originality
-
-- Does not reproduce source poster exactly.
-- Produces a unique arrangement every generation.
+12:1
 
 ---
 
-# Success Test
+## Accent Color
 
-Ask:
+Optional.
 
-1. Does the design feel typographic even when unreadable?
-2. Does the eye move naturally through the composition?
-3. Is there tension between order and chaos?
-4. Do shapes function as both letters and abstract forms?
-5. Would the result plausibly appear in a contemporary design exhibition?
+Only one accent color may appear.
 
-If most answers are yes, the poster generation is successful.
+Allowed examples:
+
+- Signal Red #D62828
+- Ultramarine #1D4ED8
+- Safety Orange #EA580C
+
+Accent usage:
+
+Less than 5% of composition.
+
+---
+
+## Color Distribution
+
+90%:
+black
+
+10%:
+background
+
+Accent:
+0–5%
+
+---
+
+# VISUAL RHYTHM
+
+Large forms should repeat.
+
+Repeating elements create cadence.
+
+Patterns should emerge from:
+
+- scale
+- rotation
+- fragmentation
+- cropping
+
+Never from decoration.
+
+---
+
+# CROPPING RULES
+
+Major shapes may extend beyond poster boundaries.
+
+At least 30% of large forms should be cropped.
+
+Cropping increases perceived scale.
+
+---
+
+# GENERATIVE EVALUATION CRITERIA
+
+Score each poster from 1–10.
+
+## Structural Integrity
+
+Does everything align to the grid?
+
+---
+
+## Hierarchy
+
+Can the eye identify a clear reading order?
+
+---
+
+## Contrast
+
+Is there strong scale contrast?
+
+---
+
+## Density Control
+
+Does complexity vary intentionally?
+
+---
+
+## Typographic Integration
+
+Do letters function as visual forms?
+
+---
+
+## Legibility Balance
+
+Can key information still be found and read?
+
+---
+
+## Visual Tension
+
+Does the composition feel dynamic rather than static?
+
+---
+
+## Overall Success
+
+A successful poster should feel as though a Swiss modernist system has been distorted, fragmented, enlarged, and reconstructed into an experimental typographic landscape while retaining enough structure that every element appears rationally placed.
