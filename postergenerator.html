@@ -4,881 +4,837 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Experimental Typographic Poster Generator</title>
-  <!-- Google Fonts: Inter (Neo-Grotesque Swiss aesthetic) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-poster: #F4F4F1;
-      --ink: #000000;
-      --accent-red: #D62828;
-      --accent-blue: #1D4ED8;
-      --accent-orange: #EA580C;
-      --panel-bg: #141416;
-      --panel-border: #26262a;
-      --panel-text: #E5E5E5;
-      --panel-muted: #8E8E93;
+      --bg-dark: #121212;
+      --panel-bg: #1e1e1e;
+      --panel-border: #333333;
+      --accent: #d62828;
+      --accent-hover: #e63946;
+      --text-main: #f4f4f1;
+      --text-muted: #a0a0a0;
+      --input-bg: #2a2a2a;
+      --canvas-aspect: 1.414; /* 100:141 Ratio */
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #0b0b0d;
-      color: var(--panel-text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
       height: 100vh;
       overflow: hidden;
-      display: flex;
     }
 
-    .app-shell {
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    /* Left Control Sidebar */
-    .sidebar {
-      width: 390px;
-      min-width: 360px;
-      max-width: 430px;
+    /* APP LAYOUT */
+    #app { display: flex; width: 100vw; height: 100vh; }
+    
+    /* LEFT PANEL: EDITOR */
+    .editor-panel {
+      width: 420px;
+      min-width: 380px;
       background: var(--panel-bg);
       border-right: 1px solid var(--panel-border);
       display: flex;
       flex-direction: column;
-      height: 100%;
       z-index: 10;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.3);
     }
 
-    .sidebar-header {
-      padding: 18px 22px;
+    .editor-header {
+      padding: 16px 20px;
       border-bottom: 1px solid var(--panel-border);
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: space-between;
     }
+    .editor-header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
 
-    .sidebar-header h1 {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 700;
-      color: #fff;
+    .editor-tabs {
+      display: flex;
+      background: #181818;
+      border-bottom: 1px solid var(--panel-border);
     }
-
-    .badge {
-      font-size: 10px;
-      background: #242428;
-      color: #9e9ea7;
-      padding: 3px 7px;
-      border-radius: 3px;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-    }
-
-    .sidebar-scroll {
+    .tab-btn {
       flex: 1;
-      overflow-y: auto;
-      padding: 20px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .sidebar-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-    .sidebar-scroll::-webkit-scrollbar-thumb {
-      background: #2a2a2e;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .control-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--panel-muted);
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .control-label span.val {
-      color: #fff;
-      font-family: monospace;
-    }
-
-    input[type="text"], select {
-      background: #1a1a1e;
-      border: 1px solid #323238;
-      color: #fff;
-      padding: 9px 12px;
-      font-size: 13px;
-      border-radius: 4px;
-      outline: none;
-      font-family: inherit;
-    }
-
-    input[type="text"]:focus, select:focus {
-      border-color: #646470;
-    }
-
-    .button-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    button.btn {
-      background: #202024;
-      border: 1px solid #36363c;
-      color: #fff;
-      padding: 10px 14px;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
       font-size: 12px;
       font-weight: 600;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent); background: var(--panel-bg); }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: none;
+    }
+    .tab-content.active { display: block; }
+
+    /* FORM CONTROLS */
+    .control-group { margin-bottom: 20px; }
+    .control-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; letter-spacing: 0.5px; }
+    
+    .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .input-row .flex-1 { flex: 1; }
+
+    input[type="text"], select, textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    input[type="range"] { flex: 1; accent-color: var(--accent); }
+    input[type="color"] {
+      -webkit-appearance: none; border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; background: transparent;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: 1px solid var(--panel-border); border-radius: 4px; }
+
+    .btn {
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--panel-border);
+      padding: 8px 12px;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.15s ease;
+    }
+    .btn:hover { background: #333; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-group { display: flex; gap: 4px; }
+    .btn-group .btn { flex: 1; padding: 6px; }
+    .btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* PALETTE SWATCHES */
+    .palette-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .swatch {
+      width: 28px; height: 28px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; position: relative;
+    }
+    .swatch.selected::after {
+      content: ''; position: absolute; inset: -3px; border: 2px solid var(--accent); border-radius: 6px;
     }
 
-    button.btn:hover {
-      background: #2c2c34;
-      border-color: #555562;
-    }
-
-    button.btn-primary {
-      background: #f4f4f1;
-      color: #0b0b0d;
-      border-color: #f4f4f1;
+    /* RIGHT PANEL: CANVAS PREVIEW */
+    .preview-panel {
       flex: 1;
-      font-weight: 700;
-    }
-
-    button.btn-primary:hover {
-      background: #ffffff;
-      transform: translateY(-1px);
-    }
-
-    .color-swatch-list {
-      display: flex;
-      gap: 8px;
-    }
-
-    .color-swatch {
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      border: 2px solid transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: bold;
-      transition: transform 0.1s;
-    }
-
-    .color-swatch.active {
-      border-color: #fff;
-      transform: scale(1.1);
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      cursor: pointer;
-      color: #cfcfd4;
-    }
-
-    /* Rubric evaluation badge panel */
-    .rubric-box {
-      background: #19191d;
-      border: 1px solid #28282e;
-      border-radius: 4px;
-      padding: 12px;
-      font-size: 11px;
-    }
-
-    .rubric-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-weight: 700;
-      color: #9999a3;
-      letter-spacing: 0.5px;
-    }
-
-    .rubric-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .rubric-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 5px 8px;
-      background: #111114;
-      border-radius: 3px;
-    }
-
-    .score-badge {
-      font-weight: 700;
-      color: #10b981;
-      font-family: monospace;
-    }
-
-    /* Main Viewport Workspace */
-    .workspace {
-      flex: 1;
-      background: #0f0f12;
+      background: #0d0d0d;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
       position: relative;
-      overflow: auto;
-    }
-
-    .toolbar-floating {
-      position: absolute;
-      top: 18px;
-      display: flex;
-      gap: 6px;
-      background: rgba(22, 22, 26, 0.85);
-      backdrop-filter: blur(10px);
-      padding: 5px 8px;
-      border-radius: 6px;
-      border: 1px solid #33333c;
-      z-index: 100;
-    }
-
-    .tool-btn {
-      background: transparent;
-      border: none;
-      color: #aaa;
-      font-size: 12px;
-      padding: 6px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 500;
-    }
-
-    .tool-btn:hover {
-      color: #fff;
-      background: #2b2b34;
-    }
-
-    /* Poster Frame (Aspect Ratio 100:141) */
-    .poster-viewport {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.08);
-      transition: transform 0.15s ease-out;
-      background: var(--bg-poster);
-    }
-
-    #poster-svg {
-      width: 540px;
-      height: 761.4px; /* 540 * 1.41 */
-      display: block;
-      background: var(--bg-poster);
       overflow: hidden;
+      padding: 20px;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+    .action-group { display: flex; gap: 8px; }
+
+    #canvas-container {
+      position: relative;
+      background-color: #F4F4F1;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      overflow: hidden;
+      cursor: default;
       user-select: none;
     }
+
+    /* CANVAS ELEMENTS */
+    .poster-element {
+      position: absolute;
+      transform-origin: center center;
+      cursor: move;
+      box-sizing: border-box;
+    }
+    .poster-element.selected {
+      outline: 1.5px dashed var(--accent);
+    }
+    .poster-text {
+      white-space: pre;
+      line-height: 0.9;
+      user-select: none;
+    }
+
+    /* GRID OVERLAY */
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      padding: 6%;
+      gap: 1.5%;
+      opacity: 0.2;
+      z-index: 99;
+    }
+    .grid-col { background: rgba(0,100,255,0.15); border: 1px dashed rgba(0,100,255,0.4); height: 100%; }
+
+    /* LAYER LIST */
+    .layer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      background: var(--input-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .layer-item.selected { border-color: var(--accent); background: #333; }
   </style>
 </head>
 <body>
 
-<div class="app-shell">
-  <!-- Left Inspector Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h1>Swiss Typographic Generator</h1>
-      <span class="badge">100 : 141</span>
+<div id="app">
+  <!-- LEFT PANEL: CONTROLS & EDITOR -->
+  <div class="editor-panel">
+    <div class="editor-header">
+      <h1>Poster Lab</h1>
+      <span style="font-size:10px; color:var(--text-muted);">Swiss / Bauhaus Engine</span>
     </div>
 
-    <div class="sidebar-scroll">
-      <!-- Actions -->
-      <div class="button-row">
-        <button id="btn-generate" class="btn btn-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/></svg>
-          Regenerate Layout
-        </button>
-        <button id="btn-random-seed" class="btn" title="Random Seed">
-          🎲 Seed
-        </button>
-      </div>
+    <div class="editor-tabs">
+      <button class="tab-btn active" onclick="switchTab('templates')">Presets</button>
+      <button class="tab-btn" onclick="switchTab('text')">Type</button>
+      <button class="tab-btn" onclick="switchTab('shapes')">Shapes</button>
+      <button class="tab-btn" onclick="switchTab('colors')">Palette</button>
+      <button class="tab-btn" onclick="switchTab('layers')">Layers</button>
+    </div>
 
-      <!-- Presets & Curated Seeds -->
+    <!-- TEMPLATES TAB -->
+    <div id="tab-templates" class="tab-content active">
       <div class="control-group">
-        <label class="control-label">Curated Typographic Preset</label>
-        <select id="preset-selector">
-          <option value="prague">Prague School of Design (Archetype)</option>
-          <option value="zurich">Zurich Kunstgewerbeschule 1958</option>
-          <option value="basel">Basel Typografische Monatsblätter</option>
-          <option value="bauhaus">Bauhaus Modular Constructivism</option>
-        </select>
-      </div>
-
-      <!-- Content Configuration -->
-      <div class="control-group">
-        <label class="control-label">Level 1 Institutional Title</label>
-        <input type="text" id="input-title" value="prague school of design" placeholder="institutional title...">
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Level 2 Date / Event Range</label>
-        <input type="text" id="input-date" value="19—25.06.15" placeholder="e.g. 19—25.06.15">
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Level 3 Secondary Metadata</label>
-        <input type="text" id="input-meta" value="Prague School of Design" placeholder="micro metadata...">
-      </div>
-
-      <!-- Visual Accent Color -->
-      <div class="control-group">
-        <label class="control-label">Accent Color (&lt; 5% rule)</label>
-        <div class="color-swatch-list">
-          <div class="color-swatch active" data-color="none" style="background:#000; border: 1px solid #555;" title="Monochrome Only">Ø</div>
-          <div class="color-swatch" data-color="#D62828" style="background:#D62828;" title="Signal Red"></div>
-          <div class="color-swatch" data-color="#1D4ED8" style="background:#1D4ED8;" title="Ultramarine"></div>
-          <div class="color-swatch" data-color="#EA580C" style="background:#EA580C;" title="Safety Orange"></div>
+        <label>Geometric Style Presets</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn" onclick="loadTemplate('swiss_modernist')">Swiss Modernist</button>
+          <button class="btn" onclick="loadTemplate('bauhaus')">Bauhaus Structural</button>
+          <button class="btn" onclick="loadTemplate('constructivist')">Constructivist</button>
+          <button class="btn" onclick="loadTemplate('minimal_geometric')">Minimal Geometric</button>
+          <button class="btn" onclick="loadTemplate('editorial')">Editorial Grid</button>
+          <button class="btn" onclick="loadTemplate('experimental')">Experimental Deconstructed</button>
         </div>
       </div>
-
-      <!-- Composition Density & Complexity -->
-      <div class="control-group">
-        <label class="control-label">Visual Density <span class="val" id="density-val">75%</span></label>
-        <input type="range" id="input-density" min="40" max="95" value="75" style="accent-color:#fff;">
+      <div class="control-group" style="margin-top: 20px;">
+        <label>Grid System Settings</label>
+        <button class="btn" style="width:100%;" onclick="toggleGrid()">Toggle 12-Column Grid Overlay</button>
       </div>
+    </div>
 
-      <!-- Structural Grid Inspector -->
+    <!-- TYPOGRAPHY TAB -->
+    <div id="tab-text" class="tab-content">
       <div class="control-group">
-        <label class="control-label">Grid &amp; Structural Overlays</label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="toggle-grid"> 12-Column &times; 18-Row Grid
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="toggle-zones"> Composition Zones (A / B / C)
-        </label>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:12px;" onclick="addText()">+ Add Text Block</button>
       </div>
-
-      <!-- Stage 04 Rubric Evaluation -->
-      <div class="rubric-box">
-        <div class="rubric-header">
-          <span>STAGE 04: EVALUATION RUBRIC</span>
-          <span style="color:#10b981;">PASSED (Score &ge; 8)</span>
+      <div id="text-controls" style="display:none;">
+        <div class="control-group">
+          <label>Text Content</label>
+          <textarea id="text-val" rows="3" oninput="updateSelectedText('text', this.value)"></textarea>
         </div>
-        <div class="rubric-grid">
-          <div class="rubric-item"><span>Grid Compliance</span><span class="score-badge" id="sc-grid">10/10</span></div>
-          <div class="rubric-item"><span>Hierarchy Scale</span><span class="score-badge" id="sc-hier">10/10</span></div>
-          <div class="rubric-item"><span>Scale Contrast</span><span class="score-badge" id="sc-cont">10/10</span></div>
-          <div class="rubric-item"><span>Density Balance</span><span class="score-badge" id="sc-dens">9/10</span></div>
-          <div class="rubric-item"><span>Typo-Form Merge</span><span class="score-badge" id="sc-typo">10/10</span></div>
-          <div class="rubric-item"><span>Legibility Balance</span><span class="score-badge" id="sc-leg">9/10</span></div>
+        <div class="control-group">
+          <label>Font Family</label>
+          <select id="text-font" onchange="updateSelectedText('fontFamily', this.value)">
+            <option value="Helvetica, Arial, sans-serif">Helvetica / Neo-Grotesque</option>
+            <option value="Courier New, monospace">Courier / Monospace</option>
+            <option value="Times New Roman, serif">Times / Serif</option>
+          </select>
         </div>
-      </div>
-
-      <!-- Export Actions -->
-      <div class="control-group">
-        <label class="control-label">Vector &amp; High-Res Export</label>
-        <div class="button-row">
-          <button id="btn-export-svg" class="btn" style="flex:1">Export SVG</button>
-          <button id="btn-export-png" class="btn" style="flex:1">Export Hi-Res PNG</button>
+        <div class="control-group">
+          <label>Custom Font (.ttf, .otf, .woff)</label>
+          <input type="file" accept=".ttf,.otf,.woff,.woff2" onchange="uploadFont(event)" style="font-size: 11px;">
+        </div>
+        <div class="control-group">
+          <label>Font Size (Scale Unit 8–276px)</label>
+          <div class="input-row">
+            <input type="range" id="text-size" min="8" max="276" oninput="updateSelectedText('fontSize', this.value + 'px')">
+            <input type="text" id="text-size-val" style="width:50px;" readonly>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Style & Weight</label>
+          <div class="btn-group">
+            <button class="btn" id="btn-bold" onclick="toggleStyle('fontWeight', 'bold', 'normal')"><b>B</b></button>
+            <button class="btn" id="btn-italic" onclick="toggleStyle('fontStyle', 'italic', 'normal')"><i>I</i></button>
+            <button class="btn" id="btn-underline" onclick="toggleStyle('textDecoration', 'underline', 'none')"><u>U</u></button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Text Color</label>
+          <input type="color" id="text-color" onchange="updateSelectedText('color', this.value)">
         </div>
       </div>
     </div>
-  </aside>
 
-  <!-- Canvas Workspace -->
-  <main class="workspace">
-    <div class="toolbar-floating">
-      <button class="tool-btn" id="zoom-in">＋ Zoom In</button>
-      <button class="tool-btn" id="zoom-out">－ Zoom Out</button>
-      <button class="tool-btn" id="zoom-reset">100%</button>
+    <!-- SHAPES TAB -->
+    <div id="tab-shapes" class="tab-content">
+      <div class="control-group">
+        <label>Add Graphic Element</label>
+        <div class="btn-group">
+          <button class="btn" onclick="addShape('rectangle')">Bar / Rect</button>
+          <button class="btn" onclick="addShape('circle')">Circle</button>
+          <button class="btn" onclick="addShape('semicircle')">Semi-Circle</button>
+          <button class="btn" onclick="addShape('line')">Line</button>
+        </div>
+      </div>
+      <div id="shape-controls" style="display:none;">
+        <div class="control-group">
+          <label>Fill Color</label>
+          <input type="color" id="shape-fill" onchange="updateSelectedShape('fill', this.value)">
+        </div>
+        <div class="control-group">
+          <label>Stroke Color & Weight</label>
+          <div class="input-row">
+            <input type="color" id="shape-stroke" onchange="updateSelectedShape('stroke', this.value)">
+            <input type="range" id="shape-stroke-width" min="0" max="30" value="0" oninput="updateSelectedShape('strokeWidth', this.value + 'px')">
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Rotation</label>
+          <div class="input-row">
+            <input type="range" id="shape-rotation" min="0" max="360" value="0" oninput="updateSelectedShape('rotation', this.value)">
+            <span id="rotation-val" style="font-size:12px; width:35px;">0°</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Opacity</label>
+          <input type="range" id="shape-opacity" min="0" max="1" step="0.05" value="1" oninput="updateSelectedShape('opacity', this.value)">
+        </div>
+      </div>
     </div>
 
-    <div class="poster-viewport" id="viewport-frame">
-      <!-- 1000 x 1410 Coordinate Space (Standard 100:141 Swiss proportion) -->
-      <svg id="poster-svg" viewBox="0 0 1000 1410" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <clipPath id="poster-bounds">
-            <rect x="0" y="0" width="1000" height="1410" />
-          </clipPath>
-        </defs>
-
-        <!-- Base Background -->
-        <rect id="svg-bg" width="1000" height="1410" fill="#F4F4F1" />
-
-        <!-- Structural Content Group clipped strictly to poster boundary -->
-        <g id="poster-content" clip-path="url(#poster-bounds)"></g>
-
-        <!-- Auxiliary Inspection Layers -->
-        <g id="grid-layer" pointer-events="none" opacity="0"></g>
-        <g id="zones-layer" pointer-events="none" opacity="0"></g>
-      </svg>
+    <!-- COLOR PALETTE TAB -->
+    <div id="tab-colors" class="tab-content">
+      <div class="control-group">
+        <label>Poster Background Color</label>
+        <input type="color" id="bg-color-picker" value="#F4F4F1" onchange="setCanvasBackground(this.value)" style="width:100%;">
+      </div>
+      <div class="control-group">
+        <label>Active Palette Swatches</label>
+        <div class="palette-list" id="palette-swatches"></div>
+        <div class="input-row">
+          <input type="color" id="new-color-val" value="#D62828">
+          <button class="btn" onclick="addPaletteColor()">Add to Palette</button>
+        </div>
+      </div>
     </div>
-  </main>
+
+    <!-- LAYERS TAB -->
+    <div id="tab-layers" class="tab-content">
+      <div class="control-group">
+        <label>Layer Ordering</label>
+        <div class="btn-group" style="margin-bottom:12px;">
+          <button class="btn" onclick="moveLayer('up')">Bring Forward</button>
+          <button class="btn" onclick="moveLayer('down')">Send Backward</button>
+        </div>
+        <button class="btn" style="width:100%; background:#421515; border-color:#600;" onclick="deleteSelected()">Delete Selected Element</button>
+      </div>
+      <div class="control-group">
+        <label>Canvas Layers</label>
+        <div id="layer-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: PREVIEW & CANVAS -->
+  <div class="preview-panel">
+    <div class="top-bar">
+      <div class="action-group">
+        <button class="btn" onclick="undo()">Undo</button>
+        <button class="btn" onclick="redo()">Redo</button>
+      </div>
+      <div class="action-group">
+        <button class="btn" onclick="exportPoster('png')">PNG</button>
+        <button class="btn" onclick="exportPoster('jpg')">JPG</button>
+        <button class="btn btn-primary" onclick="exportPoster('svg')">Export SVG</button>
+      </div>
+    </div>
+
+    <!-- MAIN POSTER CANVAS -->
+    <div id="canvas-container">
+      <div id="grid-overlay" class="grid-overlay" style="display:none;">
+        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
+        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
+        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
+      </div>
+      <div id="canvas-elements"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-/**
- * Experimental Typographic Poster Generator
- * Based on SKILLS.md and HANDOFF.md specifications:
- * - 12 Columns, 18 Rows, 100:141 Ratio
- * - Zones: A (Upper 80%), B (Middle 50%), C (Lower 75%)
- * - Strict Scale: 8, 11, 16, 21, 28, 37, 49, 65, 87, 116, 155, 207, 276
- * - Modular Spacing: 8, 16, 24, 32, 48, 64, 96, 128
- * - Abstract Typographic Deconstruction: rings, semicircles, bars, arcs, micro glyphs
- */
-
-const POSTER_W = 1000;
-const POSTER_H = 1410; // 1000 * 1.41
-const COLS = 12;
-const ROWS = 18;
-const MARGIN_X = POSTER_W * 0.06; // 60px
-const MARGIN_Y = POSTER_H * 0.06; // 84.6px
-const GUTTER = POSTER_W * 0.015;  // 15px
-
-const USABLE_W = POSTER_W - (MARGIN_X * 2);
-const COL_W = (USABLE_W - (GUTTER * (COLS - 1))) / COLS;
-const USABLE_H = POSTER_H - (MARGIN_Y * 2);
-const ROW_H = USABLE_H / ROWS;
-
-let currentSeed = 1915;
-let accentColor = 'none';
-let currentZoom = 1;
-
-// PRNG for deterministic generative layouts
-function PseudoRandom(seed) {
-  this.seed = seed % 2147483647;
-  if (this.seed <= 0) this.seed += 2147483646;
-}
-PseudoRandom.prototype.next = function() {
-  this.seed = (this.seed * 16807) % 2147483647;
-  return (this.seed - 1) / 2147483646;
-};
-PseudoRandom.prototype.range = function(min, max) {
-  return min + this.next() * (max - min);
-};
-PseudoRandom.prototype.choice = function(arr) {
-  return arr[Math.floor(this.next() * arr.length)];
-};
-
-function colX(colIndex) {
-  return MARGIN_X + colIndex * (COL_W + GUTTER);
-}
-function rowY(rowIndex) {
-  return MARGIN_Y + rowIndex * ROW_H;
-}
-
-function generatePoster(seed) {
-  const rng = new PseudoRandom(seed);
-  const container = document.getElementById('poster-content');
-  container.innerHTML = '';
-
-  const titleText = document.getElementById('input-title').value || "prague school of design";
-  const dateText = document.getElementById('input-date').value || "19—25.06.15";
-  const metaText = document.getElementById('input-meta').value || "Prague School of Design";
-  const densityMultiplier = parseInt(document.getElementById('input-density').value) / 100;
-
-  const elements = [];
-  const primaryInk = "#000000";
-  const activeAccent = accentColor !== 'none' ? accentColor : primaryInk;
-  let accentCount = 0;
-
-  const getInk = (prob = 0.1) => {
-    if (accentColor !== 'none' && accentCount < 2 && rng.next() < prob) {
-      accentCount++;
-      return activeAccent;
-    }
-    return primaryInk;
+  // STATE MANAGEMENT
+  let state = {
+    bgColor: '#F4F4F1',
+    elements: [],
+    selectedId: null,
+    palette: ['#000000', '#F4F4F1', '#D62828', '#1D4ED8', '#EA580C']
   };
 
-  // --- 1. ZONE B: CENTRAL ANCHOR (Iconic Ring & Primary Metadata) ---
-  const ringCol = 6;
-  const ringRow = 8;
-  const ringX = colX(ringCol) + COL_W / 2;
-  const ringY = rowY(ringRow) + ROW_H / 2;
-  const ringOuterR = COL_W * rng.range(2.0, 2.45);
-  const ringThickness = COL_W * 0.42;
+  const history = [];
+  let historyStep = -1;
 
-  elements.push(`
-    <!-- Central Anchor Ring -->
-    <path d="M ${ringX} ${ringY - ringOuterR}
-             A ${ringOuterR} ${ringOuterR} 0 1 0 ${ringX} ${ringY + ringOuterR}
-             A ${ringOuterR} ${ringOuterR} 0 1 0 ${ringX} ${ringY - ringOuterR}
-             Z
-             M ${ringX} ${ringY - (ringOuterR - ringThickness)}
-             A ${ringOuterR - ringThickness} ${ringOuterR - ringThickness} 0 1 1 ${ringX} ${ringY + (ringOuterR - ringThickness)}
-             A ${ringOuterR - ringThickness} ${ringOuterR - ringThickness} 0 1 1 ${ringX} ${ringY - (ringOuterR - ringThickness)}
-             Z"
-          fill="${getInk(0.08)}" fill-rule="evenodd" />
-  `);
+  const canvas = document.getElementById('canvas-container');
+  const elementsContainer = document.getElementById('canvas-elements');
 
-  // Level 2 Typography: Event Date (Left of Ring)
-  const dateX = colX(1);
-  const dateY = rowY(7) + 24;
-  elements.push(`
-    <text x="${dateX}" y="${dateY}" 
-          font-family="'Inter', sans-serif" 
-          font-size="49" 
-          font-weight="500" 
-          letter-spacing="-1px" 
-          fill="${primaryInk}">${dateText}</text>
-  `);
-
-  // Secondary Metadata text block (Level 3 / 4)
-  const metaX = colX(8) + 12;
-  const metaY = rowY(6) + 12;
-  const metaParts = metaText.split(' ');
-  const m1 = metaParts[0] || 'Prague';
-  const m2 = metaParts[1] || 'School';
-  const m3 = metaParts.slice(2).join(' ') || 'of Design';
-
-  elements.push(`
-    <g transform="translate(${metaX}, ${metaY})">
-      <line x1="-12" y1="-8" x2="-4" y2="4" stroke="${primaryInk}" stroke-width="2" />
-      <text x="0" y="0" font-family="'Inter', sans-serif" font-size="16" font-weight="700" letter-spacing="-0.5px" fill="${primaryInk}">${m1}</text>
-      <text x="0" y="18" font-family="'Inter', sans-serif" font-size="16" font-weight="700" letter-spacing="-0.5px" fill="${primaryInk}">${m2}</text>
-      <text x="0" y="36" font-family="'Inter', sans-serif" font-size="16" font-weight="700" letter-spacing="-0.5px" fill="${primaryInk}">${m3}</text>
-      <line x1="86" y1="44" x2="94" y2="56" stroke="${primaryInk}" stroke-width="2" />
-    </g>
-  `);
-
-  // --- 2. ARCHITECTURAL VERTICAL BARS (Swiss Grid Edge Anchors) ---
-  // Left border vertical bars
-  elements.push(`
-    <rect x="${colX(0)}" y="${rowY(0.4)}" width="${COL_W * 0.7}" height="${ROW_H * 5.2}" fill="${primaryInk}" />
-    <rect x="${colX(1)}" y="${rowY(3)}" width="${COL_W * 0.5}" height="${ROW_H * 1.5}" fill="${primaryInk}" />
-    <rect x="${colX(0.7)}" y="${rowY(6.5)}" width="${COL_W * 0.5}" height="${ROW_H * 2.8}" fill="${primaryInk}" />
-    <rect x="${colX(3.8)}" y="${rowY(8.8)}" width="${COL_W * 0.45}" height="${ROW_H * 4.6}" fill="${primaryInk}" />
-  `);
-
-  // Right edge vertical pillars (with controlled cropping)
-  elements.push(`
-    <rect x="${colX(11) + 8}" y="${rowY(0.2)}" width="${COL_W * 0.6}" height="${ROW_H * 5.8}" fill="${primaryInk}" />
-    <rect x="${colX(10)}" y="${rowY(0.8)}" width="${COL_W * 0.4}" height="${ROW_H * 4.2}" fill="${primaryInk}" />
-    <rect x="${colX(11.2)}" y="${rowY(6.8)}" width="${COL_W * 0.55}" height="${ROW_H * 4.5}" fill="${primaryInk}" />
-    <rect x="${colX(9.5)}" y="${rowY(7.2)}" width="${COL_W * 0.45}" height="${ROW_H * 2.2}" fill="${primaryInk}" />
-  `);
-
-  // --- 3. DECONSTRUCTED LETTERFORMS & SEMICIRCLES (Zones A & C) ---
-  const semicircles = [
-    // Zone A: Upper density field
-    { col: 1.5, row: 1.5, r: COL_W * 1.6, thick: COL_W * 0.38, rot: 180 },
-    { col: 3.2, row: 2.2, r: COL_W * 1.7, thick: COL_W * 0.38, rot: 0 },
-    { col: 2.8, row: 3.5, r: COL_W * 1.8, thick: COL_W * 0.38, rot: 180 },
-    { col: 4.4, row: 4.3, r: COL_W * 1.9, thick: COL_W * 0.38, rot: 0 },
-    { col: 8.2, row: 1.8, r: COL_W * 1.9, thick: COL_W * 0.38, rot: 180 },
+  // CANVAS RESIZING
+  function resizeCanvas() {
+    const parent = canvas.parentElement;
+    const padding = 60;
+    const availWidth = parent.clientWidth - padding;
+    const availHeight = parent.clientHeight - padding;
     
-    // Zone B/C: Lower field arcs
-    { col: 2.2, row: 8.5, r: COL_W * 2.0, thick: COL_W * 0.42, rot: 180 },
-    { col: 1.8, row: 10.2, r: COL_W * 2.0, thick: COL_W * 0.42, rot: 0 },
-    { col: 1.5, row: 11.5, r: COL_W * 1.8, thick: COL_W * 0.4, rot: 0 },
-    { col: 5.6, row: 12.8, r: COL_W * 1.9, thick: COL_W * 0.42, rot: 0 },
-    { col: 8.8, row: 10.2, r: COL_W * 2.2, thick: COL_W * 0.45, rot: 180 },
-    { col: 9.2, row: 8.2, r: COL_W * 0.8, thick: COL_W * 0.28, rot: 90 }
-  ];
+    let height = availHeight;
+    let width = height / 1.414;
 
-  semicircles.forEach((item) => {
-    if (rng.next() > densityMultiplier + 0.15) return;
-    const cx = colX(item.col);
-    const cy = rowY(item.row);
-    const outerR = item.r;
-    const innerR = outerR - item.thick;
-    const color = getInk(0.12);
-
-    elements.push(`
-      <path d="M ${-outerR} 0
-               A ${outerR} ${outerR} 0 0 1 ${outerR} 0
-               L ${innerR} 0
-               A ${innerR} ${innerR} 0 0 0 ${-innerR} 0
-               Z"
-            fill="${color}"
-            transform="translate(${cx}, ${cy}) rotate(${item.rot})" />
-    `);
-  });
-
-  // --- 4. DIAGONAL DYNAMIC TENSION BARS (45° angle) ---
-  const diagX = colX(6.8);
-  const diagY = rowY(3.8);
-  elements.push(`
-    <rect x="-14" y="-120" width="${COL_W * 0.4}" height="${ROW_H * 2.8}" fill="${primaryInk}"
-          transform="translate(${diagX}, ${diagY}) rotate(45)" />
-    <rect x="-10" y="-40" width="${COL_W * 0.35}" height="${ROW_H * 0.9}" fill="${primaryInk}"
-          transform="translate(${colX(8.8)}, ${rowY(6.8)}) rotate(-90)" />
-  `);
-
-  // --- 5. MICRO TYPOGRAPHIC GLYPH CLUSTERS (Deconstructed Font Matrix) ---
-  const glyphClusters = [
-    { x: colX(7.5), y: rowY(2.2), scale: 0.9 },
-    { x: colX(1.7), y: rowY(6.6), scale: 0.75 },
-    { x: colX(4.8), y: rowY(9.8), scale: 1.1 }
-  ];
-
-  glyphClusters.forEach((cl) => {
-    let glyphs = ``;
-    const numGlyphs = Math.floor(rng.range(9, 16));
-    for (let i = 0; i < numGlyphs; i++) {
-      const gx = rng.range(0, 100);
-      const gy = rng.range(0, 75);
-      const gType = Math.floor(rng.range(0, 4));
-      const gColor = primaryInk;
-
-      if (gType === 0) {
-        glyphs += `<path d="M -9 0 A 9 9 0 0 1 9 0" stroke="${gColor}" stroke-width="3" fill="none" transform="translate(${gx}, ${gy}) rotate(${rng.choice([0, 90, 180, 270])})" />`;
-      } else if (gType === 1) {
-        glyphs += `<line x1="0" y1="0" x2="${rng.choice([16, 28, 42])}" y2="0" stroke="${gColor}" stroke-width="${rng.choice([2.5, 4])}" transform="translate(${gx}, ${gy}) rotate(${rng.choice([0, 90])})" />`;
-      } else if (gType === 2) {
-        glyphs += `<path d="M 0 0 L 10 0 L 10 10" stroke="${gColor}" stroke-width="2.5" fill="none" transform="translate(${gx}, ${gy})" />`;
-      } else {
-        glyphs += `<rect x="${gx}" y="${gy}" width="4" height="4" fill="${gColor}" />`;
-      }
+    if (width > availWidth) {
+      width = availWidth;
+      height = width * 1.414;
     }
 
-    elements.push(`
-      <g transform="translate(${cl.x}, ${cl.y}) scale(${cl.scale})">
-        ${glyphs}
-      </g>
-    `);
-  });
-
-  // --- 6. ZONE C RESOLUTION: PRIMARY INSTITUTIONAL TITLE (Level 1) ---
-  const titleParts = titleText.split(" ");
-  const line1 = titleParts[0] || "prague";
-  const line2 = titleParts[1] || "school";
-  const line3 = titleParts.slice(2).join(" ") || "of design";
-  
-  const titleX = colX(7.6);
-  const titleY = rowY(11.4);
-  const fontSize = 65; 
-  const lineLeading = 58;
-
-  elements.push(`
-    <g transform="translate(${titleX}, ${titleY})">
-      <text x="0" y="0" 
-            font-family="'Inter', sans-serif" 
-            font-size="${fontSize}" 
-            font-weight="700" 
-            letter-spacing="-2.5px" 
-            fill="${primaryInk}">${line1}</text>
-      <text x="0" y="${lineLeading}" 
-            font-family="'Inter', sans-serif" 
-            font-size="${fontSize}" 
-            font-weight="700" 
-            letter-spacing="-2.5px" 
-            fill="${primaryInk}">${line2}</text>
-      <text x="0" y="${lineLeading * 2}" 
-            font-family="'Inter', sans-serif" 
-            font-size="${fontSize}" 
-            font-weight="700" 
-            letter-spacing="-2.5px" 
-            fill="${primaryInk}">${line3}</text>
-    </g>
-  `);
-
-  // Structural horizontal footing bars (Zone C anchor)
-  elements.push(`
-    <rect x="${colX(1)}" y="${rowY(12.7)}" width="${COL_W * 1.8}" height="${ROW_H * 0.4}" fill="${primaryInk}" />
-    <rect x="${colX(7.6)}" y="${rowY(13.2)}" width="${COL_W * 3.3}" height="${ROW_H * 0.45}" fill="${primaryInk}" />
-  `);
-
-  container.innerHTML = elements.join('\n');
-}
-
-function renderGridOverlay() {
-  const gridGroup = document.getElementById('grid-layer');
-  gridGroup.innerHTML = '';
-  
-  let markup = '';
-  for (let c = 0; c < COLS; c++) {
-    const x = colX(c);
-    markup += `<rect x="${x}" y="${MARGIN_Y}" width="${COL_W}" height="${USABLE_H}" fill="rgba(0, 120, 255, 0.05)" stroke="rgba(0, 120, 255, 0.25)" stroke-width="1" />`;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
   }
-  for (let r = 0; r <= ROWS; r++) {
-    const y = rowY(r);
-    markup += `<line x1="${MARGIN_X}" y1="${y}" x2="${POSTER_W - MARGIN_X}" y2="${y}" stroke="rgba(255, 0, 80, 0.2)" stroke-width="1" stroke-dasharray="3 3" />`;
+  window.addEventListener('resize', resizeCanvas);
+
+  function pushHistory() {
+    historyStep++;
+    history.splice(historyStep);
+    history.push(JSON.stringify(state));
   }
-  markup += `<rect x="${MARGIN_X}" y="${MARGIN_Y}" width="${USABLE_W}" height="${USABLE_H}" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="1.5" />`;
-  gridGroup.innerHTML = markup;
-}
 
-function renderZonesOverlay() {
-  const zoneGroup = document.getElementById('zones-layer');
-  zoneGroup.innerHTML = '';
-  
-  const hA = POSTER_H * 0.38;
-  const hB = POSTER_H * 0.28;
-  const hC = POSTER_H - hA - hB;
-
-  const markup = `
-    <!-- Zone A -->
-    <rect x="0" y="0" width="${POSTER_W}" height="${hA}" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 6" />
-    <text x="30" y="50" font-family="'Inter'" font-size="20" font-weight="700" fill="#2563eb">ZONE A (UPPER DENSITY ~80%)</text>
-    <!-- Zone B -->
-    <rect x="0" y="${hA}" width="${POSTER_W}" height="${hB}" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 6" />
-    <text x="30" y="${hA + 50}" font-family="'Inter'" font-size="20" font-weight="700" fill="#16a34a">ZONE B (PAUSE & ANCHOR ~50%)</text>
-    <!-- Zone C -->
-    <rect x="0" y="${hA + hB}" width="${POSTER_W}" height="${hC}" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="6 6" />
-    <text x="30" y="${hA + hB + 50}" font-family="'Inter'" font-size="20" font-weight="700" fill="#d97706">ZONE C (RESOLUTION ~75%)</text>
-  `;
-  zoneGroup.innerHTML = markup;
-}
-
-// Event Listeners
-document.getElementById('btn-generate').addEventListener('click', () => {
-  currentSeed = Math.floor(Math.random() * 999999);
-  generatePoster(currentSeed);
-});
-
-document.getElementById('btn-random-seed').addEventListener('click', () => {
-  currentSeed = Math.floor(Math.random() * 999999);
-  generatePoster(currentSeed);
-});
-
-document.getElementById('preset-selector').addEventListener('change', (e) => {
-  const val = e.target.value;
-  if (val === 'prague') {
-    currentSeed = 1915;
-    document.getElementById('input-title').value = "prague school of design";
-    document.getElementById('input-date').value = "19—25.06.15";
-    document.getElementById('input-meta').value = "Prague School of Design";
-  } else if (val === 'zurich') {
-    currentSeed = 4058;
-    document.getElementById('input-title').value = "kunstgewerbe museum zurich";
-    document.getElementById('input-date').value = "04—28.11.58";
-    document.getElementById('input-meta').value = "Konstruktive Grafik";
-  } else if (val === 'basel') {
-    currentSeed = 7712;
-    document.getElementById('input-title').value = "allgemeine gewerbeschule";
-    document.getElementById('input-date').value = "12—19.04.68";
-    document.getElementById('input-meta').value = "Typografische Monatsblatter";
-  } else if (val === 'bauhaus') {
-    currentSeed = 8841;
-    document.getElementById('input-title').value = "staatliches bauhaus weimar";
-    document.getElementById('input-date').value = "15—22.08.23";
-    document.getElementById('input-meta').value = "Ausstellung Konstruktivismus";
+  function undo() {
+    if (historyStep > 0) {
+      historyStep--;
+      state = JSON.parse(history[historyStep]);
+      render();
+    }
   }
-  generatePoster(currentSeed);
-});
 
-['input-title', 'input-date', 'input-meta'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => generatePoster(currentSeed));
-});
-
-const densityInput = document.getElementById('input-density');
-densityInput.addEventListener('input', (e) => {
-  document.getElementById('density-val').textContent = e.target.value + '%';
-  generatePoster(currentSeed);
-});
-
-document.querySelectorAll('.color-swatch').forEach(swatch => {
-  swatch.addEventListener('click', () => {
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-    swatch.classList.add('active');
-    accentColor = swatch.getAttribute('data-color');
-    generatePoster(currentSeed);
-  });
-});
-
-document.getElementById('toggle-grid').addEventListener('change', (e) => {
-  document.getElementById('grid-layer').setAttribute('opacity', e.target.checked ? '1' : '0');
-});
-
-document.getElementById('toggle-zones').addEventListener('change', (e) => {
-  document.getElementById('zones-layer').setAttribute('opacity', e.target.checked ? '1' : '0');
-});
-
-const viewportFrame = document.getElementById('viewport-frame');
-document.getElementById('zoom-in').addEventListener('click', () => {
-  currentZoom = Math.min(currentZoom + 0.15, 2.0);
-  viewportFrame.style.transform = `scale(${currentZoom})`;
-});
-document.getElementById('zoom-out').addEventListener('click', () => {
-  currentZoom = Math.max(currentZoom - 0.15, 0.5);
-  viewportFrame.style.transform = `scale(${currentZoom})`;
-});
-document.getElementById('zoom-reset').addEventListener('click', () => {
-  currentZoom = 1;
-  viewportFrame.style.transform = `scale(1)`;
-});
-
-document.getElementById('btn-export-svg').addEventListener('click', () => {
-  const svgEl = document.getElementById('poster-svg').cloneNode(true);
-  if (document.getElementById('grid-layer').getAttribute('opacity') === '0') {
-    svgEl.querySelector('#grid-layer').remove();
+  function redo() {
+    if (historyStep < history.length - 1) {
+      historyStep++;
+      state = JSON.parse(history[historyStep]);
+      render();
+    }
   }
-  if (document.getElementById('zones-layer').getAttribute('opacity') === '0') {
-    svgEl.querySelector('#zones-layer').remove();
+
+  // ELEMENT MANAGEMENT
+  function generateId() { return 'el_' + Math.random().toString(36).substr(2, 9); }
+
+  function addText(defaults = {}) {
+    const el = {
+      id: generateId(),
+      type: 'text',
+      text: defaults.text || 'prague\nschool\nof\ndesign',
+      x: defaults.x || 10,
+      y: defaults.y || 10,
+      fontSize: defaults.fontSize || 37,
+      fontFamily: defaults.fontFamily || 'Helvetica, Arial, sans-serif',
+      fontWeight: defaults.fontWeight || 'bold',
+      fontStyle: 'normal',
+      textDecoration: 'none',
+      color: defaults.color || '#000000',
+      rotation: defaults.rotation || 0,
+      opacity: 1
+    };
+    state.elements.push(el);
+    state.selectedId = el.id;
+    pushHistory();
+    render();
   }
-  const serializer = new XMLSerializer();
-  const source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(svgEl);
-  const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `swiss-poster-${currentSeed}.svg`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-});
 
-document.getElementById('btn-export-png').addEventListener('click', () => {
-  const svgEl = document.getElementById('poster-svg');
-  const serializer = new XMLSerializer();
-  const svgString = serializer.serializeToString(svgEl);
-  const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const URLObj = window.URL || window.webkitURL || window;
-  const blobURL = URLObj.createObjectURL(svgBlob);
+  function addShape(shapeType, defaults = {}) {
+    const el = {
+      id: generateId(),
+      type: 'shape',
+      shapeType: shapeType,
+      x: defaults.x || 20,
+      y: defaults.y || 20,
+      width: defaults.width || 30,
+      height: defaults.height || 30,
+      fill: defaults.fill || '#000000',
+      stroke: defaults.stroke || 'transparent',
+      strokeWidth: defaults.strokeWidth || 0,
+      rotation: defaults.rotation || 0,
+      opacity: defaults.opacity || 1
+    };
+    state.elements.push(el);
+    state.selectedId = el.id;
+    pushHistory();
+    render();
+  }
 
-  const img = new Image();
-  img.onload = function() {
-    const canvas = document.createElement('canvas');
-    canvas.width = POSTER_W * 2;
-    canvas.height = POSTER_H * 2;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    URLObj.revokeObjectURL(blobURL);
+  function selectElement(id) {
+    state.selectedId = id;
+    render();
+  }
 
-    const pngUrl = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = pngUrl;
-    a.download = `swiss-poster-${currentSeed}-2x.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-  img.src = blobURL;
-});
+  // RENDER ENGINE
+  function render() {
+    canvas.style.backgroundColor = state.bgColor;
+    document.getElementById('bg-color-picker').value = state.bgColor;
+    elementsContainer.innerHTML = '';
 
-// Initialize
-renderGridOverlay();
-renderZonesOverlay();
-generatePoster(currentSeed);
+    state.elements.forEach(el => {
+      const node = document.createElement('div');
+      node.className = `poster-element ${el.id === state.selectedId ? 'selected' : ''}`;
+      node.style.left = `${el.x}%`;
+      node.style.top = `${el.y}%`;
+      node.style.transform = `rotate(${el.rotation || 0}deg)`;
+      node.style.opacity = el.opacity;
+
+      if (el.type === 'text') {
+        node.className += ' poster-text';
+        node.innerText = el.text;
+        node.style.fontSize = `${(el.fontSize / 800) * canvas.clientWidth}px`;
+        node.style.fontFamily = el.fontFamily;
+        node.style.fontWeight = el.fontWeight;
+        node.style.fontStyle = el.fontStyle;
+        node.style.textDecoration = el.textDecoration;
+        node.style.color = el.color;
+      } else if (el.type === 'shape') {
+        node.style.width = `${el.width}%`;
+        node.style.height = `${el.height}%`;
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+
+        if (el.shapeType === 'rectangle') {
+          const rect = document.createElementNS(svgNS, "rect");
+          rect.setAttribute("width", "100%");
+          rect.setAttribute("height", "100%");
+          rect.setAttribute("fill", el.fill);
+          rect.setAttribute("stroke", el.stroke);
+          rect.setAttribute("stroke-width", el.strokeWidth);
+          svg.appendChild(rect);
+        } else if (el.shapeType === 'circle') {
+          const circle = document.createElementNS(svgNS, "ellipse");
+          circle.setAttribute("cx", "50%");
+          circle.setAttribute("cy", "50%");
+          circle.setAttribute("rx", "48%");
+          circle.setAttribute("ry", "48%");
+          circle.setAttribute("fill", el.fill);
+          circle.setAttribute("stroke", el.stroke);
+          circle.setAttribute("stroke-width", el.strokeWidth);
+          svg.appendChild(circle);
+        } else if (el.shapeType === 'semicircle') {
+          const path = document.createElementNS(svgNS, "path");
+          path.setAttribute("d", "M 0,100 A 100,100 0 0,1 200,100 Z");
+          path.setAttribute("viewBox", "0 0 200 100");
+          svg.setAttribute("viewBox", "0 0 200 100");
+          path.setAttribute("fill", el.fill);
+          path.setAttribute("stroke", el.stroke);
+          path.setAttribute("stroke-width", el.strokeWidth);
+          svg.appendChild(path);
+        } else if (el.shapeType === 'line') {
+          const line = document.createElementNS(svgNS, "line");
+          line.setAttribute("x1", "0");
+          line.setAttribute("y1", "50%");
+          line.setAttribute("x2", "100%");
+          line.setAttribute("y2", "50%");
+          line.setAttribute("stroke", el.fill !== 'transparent' ? el.fill : el.stroke);
+          line.setAttribute("stroke-width", el.strokeWidth || 4);
+          svg.appendChild(line);
+        }
+        node.appendChild(svg);
+      }
+
+      // DRAG & DROP INTERACTION
+      node.addEventListener('mousedown', e => {
+        e.stopPropagation();
+        selectElement(el.id);
+        let startX = e.clientX;
+        let startY = e.clientY;
+
+        function onMouseMove(me) {
+          const dx = ((me.clientX - startX) / canvas.clientWidth) * 100;
+          const dy = ((me.clientY - startY) / canvas.clientHeight) * 100;
+          el.x += dx;
+          el.y += dy;
+          startX = me.clientX;
+          startY = me.clientY;
+          render();
+        }
+
+        function onMouseUp() {
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          pushHistory();
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+
+      elementsContainer.appendChild(node);
+    });
+
+    updateControlPanels();
+    renderPalette();
+    renderLayers();
+  }
+
+  // CONTROL PANEL UPDATES
+  function updateControlPanels() {
+    const sel = state.elements.find(e => e.id === state.selectedId);
+    const textCtrl = document.getElementById('text-controls');
+    const shapeCtrl = document.getElementById('shape-controls');
+
+    if (!sel) {
+      textCtrl.style.display = 'none';
+      shapeCtrl.style.display = 'none';
+      return;
+    }
+
+    if (sel.type === 'text') {
+      textCtrl.style.display = 'block';
+      shapeCtrl.style.display = 'none';
+      document.getElementById('text-val').value = sel.text;
+      document.getElementById('text-size').value = sel.fontSize;
+      document.getElementById('text-size-val').value = sel.fontSize + 'px';
+      document.getElementById('text-color').value = sel.color;
+    } else if (sel.type === 'shape') {
+      textCtrl.style.display = 'none';
+      shapeCtrl.style.display = 'block';
+      document.getElementById('shape-fill').value = sel.fill;
+      document.getElementById('shape-stroke').value = sel.stroke;
+      document.getElementById('shape-rotation').value = sel.rotation || 0;
+      document.getElementById('rotation-val').innerText = (sel.rotation || 0) + '°';
+      document.getElementById('shape-opacity').value = sel.opacity;
+    }
+  }
+
+  function updateSelectedText(prop, val) {
+    const sel = state.elements.find(e => e.id === state.selectedId);
+    if (sel && sel.type === 'text') {
+      if (prop === 'fontSize') val = parseInt(val);
+      sel[prop] = val;
+      render();
+    }
+  }
+
+  function updateSelectedShape(prop, val) {
+    const sel = state.elements.find(e => e.id === state.selectedId);
+    if (sel && sel.type === 'shape') {
+      sel[prop] = val;
+      render();
+    }
+  }
+
+  function toggleStyle(prop, val1, val2) {
+    const sel = state.elements.find(e => e.id === state.selectedId);
+    if (sel && sel.type === 'text') {
+      sel[prop] = sel[prop] === val1 ? val2 : val1;
+      render();
+    }
+  }
+
+  // FONT UPLOADER
+  function uploadFont(evt) {
+    const file = evt.target.files[0];
+    if (!file) return;
+    const fontName = file.name.split('.')[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const newFont = new FontFace(fontName, e.target.result);
+      newFont.load().then(loadedFont => {
+        document.fonts.add(loadedFont);
+        const select = document.getElementById('text-font');
+        const opt = document.createElement('option');
+        opt.value = fontName;
+        opt.innerText = fontName + ' (Custom)';
+        select.appendChild(opt);
+        select.value = fontName;
+        updateSelectedText('fontFamily', fontName);
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // PALETTE SYSTEM
+  function setCanvasBackground(color) {
+    state.bgColor = color;
+    pushHistory();
+    render();
+  }
+
+  function renderPalette() {
+    const container = document.getElementById('palette-swatches');
+    container.innerHTML = '';
+    state.palette.forEach(color => {
+      const sw = document.createElement('div');
+      sw.className = 'swatch';
+      sw.style.backgroundColor = color;
+      sw.onclick = () => {
+        const sel = state.elements.find(e => e.id === state.selectedId);
+        if (sel) {
+          if (sel.type === 'text') sel.color = color;
+          if (sel.type === 'shape') sel.fill = color;
+          pushHistory();
+          render();
+        }
+      };
+      container.appendChild(sw);
+    });
+  }
+
+  function addPaletteColor() {
+    const col = document.getElementById('new-color-val').value;
+    if (!state.palette.includes(col)) {
+      state.palette.push(col);
+      renderPalette();
+    }
+  }
+
+  // LAYERS
+  function renderLayers() {
+    const list = document.getElementById('layer-list');
+    list.innerHTML = '';
+    [...state.elements].reverse().forEach(el => {
+      const item = document.createElement('div');
+      item.className = `layer-item ${el.id === state.selectedId ? 'selected' : ''}`;
+      item.innerText = el.type === 'text' ? `Text: ${el.text.substring(0, 12)}...` : `Shape: ${el.shapeType}`;
+      item.onclick = () => selectElement(el.id);
+      list.appendChild(item);
+    });
+  }
+
+  function moveLayer(dir) {
+    const idx = state.elements.findIndex(e => e.id === state.selectedId);
+    if (idx < 0) return;
+    if (dir === 'up' && idx < state.elements.length - 1) {
+      const el = state.elements.splice(idx, 1)[0];
+      state.elements.splice(idx + 1, 0, el);
+    } else if (dir === 'down' && idx > 0) {
+      const el = state.elements.splice(idx, 1)[0];
+      state.elements.splice(idx - 1, 0, el);
+    }
+    pushHistory();
+    render();
+  }
+
+  function deleteSelected() {
+    state.elements = state.elements.filter(e => e.id !== state.selectedId);
+    state.selectedId = null;
+    pushHistory();
+    render();
+  }
+
+  function toggleGrid() {
+    const grid = document.getElementById('grid-overlay');
+    grid.style.display = grid.style.display === 'none' ? 'grid' : 'none';
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.addClass ? document.getElementById(`tab-${tabName}`).classList.addClass('active') : document.getElementById(`tab-${tabName}`).className += ' active';
+  }
+
+  // PRESET GEOMETRIC TEMPLATES
+  function loadTemplate(name) {
+    state.elements = [];
+    if (name === 'swiss_modernist') {
+      state.bgColor = '#F4F4F1';
+      // Modular Semicircles, Vertical Bars & Deconstructed Type (Matching Image Style)
+      addShape('rectangle', { x: 4, y: 3, width: 4, height: 92, fill: '#000000' });
+      addShape('rectangle', { x: 92, y: 3, width: 4, height: 92, fill: '#000000' });
+      addShape('semicircle', { x: 15, y: 4, width: 32, height: 16, fill: '#000000', rotation: 180 });
+      addShape('semicircle', { x: 22, y: 22, width: 28, height: 14, fill: '#000000', rotation: 0 });
+      addShape('circle', { x: 45, y: 38, width: 26, height: 18, fill: 'transparent', stroke: '#000000', strokeWidth: 12 });
+      addText({ text: '19—25.06.15', x: 12, y: 41, fontSize: 49 });
+      addText({ text: 'prague\nschool\nof\ndesign', x: 72, y: 80, fontSize: 87 });
+      addShape('semicircle', { x: 12, y: 70, width: 28, height: 14, fill: '#000000', rotation: 0 });
+      addShape('semicircle', { x: 12, y: 80, width: 28, height: 14, fill: '#000000', rotation: 0 });
+    } else if (name === 'bauhaus') {
+      state.bgColor = '#EAE6DF';
+      addShape('circle', { x: 20, y: 15, width: 40, height: 28, fill: '#D62828' });
+      addShape('rectangle', { x: 15, y: 50, width: 65, height: 8, fill: '#000000' });
+      addText({ text: 'BAUHAUS\n1919-1928', x: 18, y: 62, fontSize: 116, color: '#000000' });
+      addShape('line', { x: 15, y: 80, width: 70, strokeWidth: 8, fill: '#1D4ED8' });
+    } else if (name === 'constructivist') {
+      state.bgColor = '#111111';
+      addShape('rectangle', { x: 10, y: 10, width: 80, height: 80, fill: '#D62828', rotation: 15 });
+      addText({ text: 'BEAT THE WHITES\nWITH THE RED WEDGE', x: 15, y: 40, fontSize: 87, color: '#F4F4F1' });
+    } else if (name === 'minimal_geometric') {
+      state.bgColor = '#FFFFFF';
+      addShape('circle', { x: 35, y: 30, width: 30, height: 21, fill: '#EA580C' });
+      addText({ text: 'LESS IS MORE', x: 35, y: 65, fontSize: 37, color: '#000000' });
+    } else if (name === 'editorial') {
+      state.bgColor = '#F0F0F0';
+      addText({ text: 'ARCHITECTURAL\nSYSTEMS', x: 8, y: 10, fontSize: 155, color: '#000000' });
+      addShape('line', { x: 8, y: 32, width: 84, strokeWidth: 2, fill: '#000000' });
+    } else if (name === 'experimental') {
+      state.bgColor = '#0A0A0A';
+      addShape('semicircle', { x: 5, y: 5, width: 60, height: 30, fill: '#F4F4F1', rotation: 45 });
+      addText({ text: 'DECONSTRUCT', x: 10, y: 50, fontSize: 207, color: '#D62828' });
+    }
+    pushHistory();
+    render();
+  }
+
+  // EXPORT SYSTEM
+  function exportPoster(format) {
+    const node = document.getElementById('canvas-container');
+    if (format === 'svg') {
+      let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1131" viewBox="0 0 100 141" style="background:${state.bgColor}">`;
+      state.elements.forEach(el => {
+        if (el.type === 'shape') {
+          if (el.shapeType === 'rectangle') {
+            svgContent += `<rect x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}" fill="${el.fill}" transform="rotate(${el.rotation || 0} ${el.x} ${el.y})"/>`;
+          } else if (el.shapeType === 'circle') {
+            svgContent += `<ellipse cx="${el.x + el.width/2}" cy="${el.y + el.height/2}" rx="${el.width/2}" ry="${el.height/2}" fill="${el.fill}"/>`;
+          }
+        } else if (el.type === 'text') {
+          svgContent += `<text x="${el.x}" y="${el.y + 5}" font-size="${el.fontSize/15}" font-family="${el.fontFamily}" fill="${el.color}">${el.text}</text>`;
+        }
+      });
+      svgContent += `</svg>`;
+      const blob = new Blob([svgContent], {type: 'image/svg+xml'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'poster.svg';
+      a.click();
+    } else {
+      alert(`Exporting as ${format.toUpperCase()}... (For production PNG/JPG, render SVG to HTML5 Canvas blob)`);
+    }
+  }
+
+  // INIT
+  resizeCanvas();
+  loadTemplate('swiss_modernist');
 </script>
 </body>
 </html>
