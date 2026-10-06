@@ -1,840 +1,348 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Experimental Typographic Poster Generator</title>
-  <style>
-    :root {
-      --bg-dark: #121212;
-      --panel-bg: #1e1e1e;
-      --panel-border: #333333;
-      --accent: #d62828;
-      --accent-hover: #e63946;
-      --text-main: #f4f4f1;
-      --text-muted: #a0a0a0;
-      --input-bg: #2a2a2a;
-      --canvas-aspect: 1.414; /* 100:141 Ratio */
-    }
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Poster Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Roboto:wght@400;500;700;900&family=Open+Sans:wght@400;500;700;800&family=Montserrat:wght@400;500;700;900&family=Poppins:wght@400;500;700;900&family=Work+Sans:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&family=Playfair+Display:wght@400;500;700;900&family=Merriweather:wght@400;700;900&family=Oswald:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--fg:#111;--mut:#666;--line:#d9d9d9;--panel:#fff;--view:#e9e9e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111;--fg:#f2f2f2;--mut:#999;--line:#333;--panel:#111;--view:#1d1d1d}}
+:root[data-theme="dark"]{--bg:#111;--fg:#f2f2f2;--mut:#999;--line:#333;--panel:#111;--view:#1d1d1d}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.4 Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;display:flex;overflow:hidden}
+#side{width:340px;flex:none;height:100%;overflow-y:auto;border-right:1px solid var(--fg);background:var(--panel)}
+.dl{padding:16px 20px 24px;border-top:3px double var(--fg)}.hdl{font-weight:700;margin-bottom:10px}
+button.b:disabled{opacity:.35;cursor:default}
+.mast{padding:20px 20px 16px;border-bottom:3px double var(--fg)}
+.mast h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.mast p{margin:6px 0 0;color:var(--mut);font-size:12px}
+.hd{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;width:100%;padding:13px 20px;font-weight:700;cursor:pointer;border-bottom:1px solid var(--line)}
+.hd:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
+.hd i{font-style:normal;transition:transform .25s}.open>.hd i{transform:rotate(45deg)}
+.bd{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease;border-bottom:1px solid var(--line)}
+.open>.bd{grid-template-rows:1fr}.in{overflow:hidden;min-height:0}.pad{padding:4px 20px 18px}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 4px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+button.b,select,textarea,input[type=text]{font:inherit;font-size:13px;background:var(--bg);color:var(--fg);border:1px solid var(--fg);border-radius:0;padding:6px 10px;cursor:pointer}
+button.b.on{background:var(--fg);color:var(--bg)}textarea{width:100%;resize:vertical;cursor:text}select{width:100%}
+input[type=range]{width:100%;accent-color:var(--fg)}input[type=color]{width:40px;height:30px;padding:0;border:1px solid var(--fg);background:none}
+.grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sw{display:flex;align-items:center;gap:8px}.sw span{width:14px;height:14px;border:1px solid var(--fg);display:inline-block}
+.hint{color:var(--mut);font-size:12px;margin:10px 0 0}.chk{display:flex;gap:8px;align-items:center;margin:8px 0;color:var(--fg);font-size:13px}
+#main{flex:1;position:relative;background:var(--view);overflow:hidden}
+#vp{position:absolute;inset:0;cursor:grab;touch-action:none}#vp.pan{cursor:grabbing}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#svg{display:block;width:640px;height:905px;touch-action:none}
+#tools{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:3;display:flex;gap:16px;white-space:nowrap}
+#bar,#hist{display:flex;border:1px solid var(--fg);background:var(--bg)}
+#bar button,#hist button{all:unset;padding:8px 14px;cursor:pointer;border-right:1px solid var(--fg);font-size:13px}#bar button:last-child,#hist button:last-child{border:0}
+#bar button:hover,#hist button:hover:not(:disabled){background:var(--fg);color:var(--bg)}#bar button:focus-visible,#hist button:focus-visible{outline:2px solid var(--fg);outline-offset:-4px}#hist button:disabled{opacity:.35;cursor:default}
+@media (max-width:800px){body{flex-direction:column-reverse}#side{width:100%;height:46%;border-right:0;border-top:1px solid var(--fg)}#main{height:54%;flex:none}}
+@media (prefers-reduced-motion:reduce){.bd,.hd i{transition:none}}
+</style></head><body>
+<aside id="side">
+<div class="mast"><h1>Poster Generator</h1></div>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+<section class="ac open"><button class="hd">Layout<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<div class="grid6" id="vers"></div>
+<div class="chk"><input type="checkbox" id="showGrid"><span>Show grid</span></div>
+<div class="chk"><input type="checkbox" id="snap" checked><span>Snap text to grid</span></div>
+<p class="hint">Layouts keep your colors, text and effects.</p>
+</div></div></div></section>
 
-    /* APP LAYOUT */
-    #app { display: flex; width: 100vw; height: 100vh; }
-    
-    /* LEFT PANEL: EDITOR */
-    .editor-panel {
-      width: 420px;
-      min-width: 380px;
-      background: var(--panel-bg);
-      border-right: 1px solid var(--panel-border);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
-      box-shadow: 4px 0 15px rgba(0,0,0,0.3);
-    }
+<section class="ac" id="secSel"><button class="hd">Selected shape<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<label style="margin-top:8px">Add a shape</label>
+<select id="aType" aria-label="Add a shape"><option value="">Choose a shape to add</option><option value="bv">Bar, vertical</option><option value="bh">Bar, horizontal</option><option value="circle">Circle</option><option value="ring">Ring</option><option value="semi">Semicircle</option><option value="arc">Arc</option><option value="quarter">Quarter circle</option></select>
+<p class="hint" id="noSel">Click a shape on the poster to edit it, or drag it to move it.</p>
+<div id="selUI" hidden>
+<label>Color</label><div class="row"><input type="color" id="sColor"><button class="b" id="sReset">Use global color</button></div>
+<div class="chk"><input type="checkbox" id="sOut"><span>Outline only</span></div>
+<div id="owWrap" hidden><label>Outline weight <b id="owV"></b></label><input type="range" id="sOw" min="1" max="30" step="1"></div>
+<label>Scale <b id="sSv"></b></label><input type="range" id="sScale" min="0.1" max="6" step="0.05">
+<label>Rotation</label><input type="range" id="sRot" min="-180" max="180" step="15">
+</div></div></div></div></section>
 
-    .editor-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--panel-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .editor-header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+<section class="ac"><button class="hd">Color<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<label>Background</label><div class="row"><input type="color" id="cBg" value="#F4F4F1" aria-label="Background color"><button class="b" id="cBgR">Reset</button></div>
+<label>All shapes</label><div class="row"><input type="color" id="cFg" value="#000000" aria-label="Shape color"><button class="b" id="cFgR">Reset</button></div>
+<p class="hint">The shape color replaces any color set on a single shape. To color one shape, select it on the poster.</p>
+</div></div></div></section>
 
-    .editor-tabs {
-      display: flex;
-      background: #181818;
-      border-bottom: 1px solid var(--panel-border);
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
-    .tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent); background: var(--panel-bg); }
+<section class="ac"><button class="hd">Scale<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<label>All shapes <b id="gSv">100%</b></label><input type="range" id="gScale" min="0.5" max="1.5" step="0.01" value="1">
+</div></div></div></section>
 
-    .tab-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: none;
-    }
-    .tab-content.active { display: block; }
+<section class="ac"><button class="hd">Typography<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<p class="hint" id="tNote">Click text on the poster to edit it, or add new text. Added text shows on every template.</p>
+<div class="row" style="margin-top:8px"><button class="b" id="tAdd">Add text</button><button class="b" id="tDel">Remove</button></div>
+<div id="tUI" hidden>
+<label>Content</label><textarea id="tTxt" rows="3"></textarea>
+<label>Font</label><select id="tFont"></select>
+<label>Upload font (.ttf .otf .woff)</label><input type="file" id="tUp" accept=".ttf,.otf,.woff,.woff2">
+<label>Size <b id="tSv"></b></label><input type="range" id="tSize" min="0" max="12" step="1">
+<div class="row" style="margin-top:10px"><button class="b" id="tB"><b>B</b></button><button class="b" id="tI"><i>I</i></button><button class="b" id="tU"><u>U</u></button></div>
+<label>Effects</label><div class="row"><button class="b" id="tOl">Outline</button><button class="b" id="tHl">Highlight</button></div>
+<label>Opacity</label><input type="range" id="tOp" min="0.1" max="1" step="0.05">
+<label>Text color</label><input type="color" id="tCol" aria-label="Text color">
+<label>Highlight color</label><input type="color" id="tHlc" value="#FFE14D" aria-label="Highlight color">
+<p class="hint">Drag text on the poster to move it.</p>
+</div></div></div></div></section>
 
-    /* FORM CONTROLS */
-    .control-group { margin-bottom: 20px; }
-    .control-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; letter-spacing: 0.5px; }
-    
-    .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .input-row .flex-1 { flex: 1; }
+<section class="ac"><button class="hd">Effects<i>+</i></button><div class="bd"><div class="in"><div class="pad">
+<label>Texture</label><div class="grid6" id="fxs" style="grid-template-columns:1fr 1fr"></div>
+<label>Strength <b id="fSv"></b></label><input type="range" id="fStr" min="0.1" max="1" step="0.05" value="0.6">
+<label style="margin-top:18px">Shape pattern</label><div class="grid6" id="pts" style="grid-template-columns:1fr 1fr"></div>
+<label>Pattern size <b id="pSv"></b></label><input type="range" id="pSize" min="4" max="40" step="1" value="10">
+</div></div></div></section>
+<div class="dl"><div class="hdl">Download</div><div class="row"><button class="b" id="dSvg">SVG</button><button class="b" id="dPdf">PDF</button><button class="b" id="dPng">PNG</button></div><p class="hint" style="margin-top:8px">SVG stays vector. PDF is A4 and PNG is 2132 × 3016 px, both as images.</p></div>
+</aside>
 
-    input[type="text"], select, textarea {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--panel-border);
-      color: var(--text-main);
-      padding: 8px 10px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-    input[type="range"] { flex: 1; accent-color: var(--accent); }
-    input[type="color"] {
-      -webkit-appearance: none; border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; background: transparent;
-    }
-    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    input[type="color"]::-webkit-color-swatch { border: 1px solid var(--panel-border); border-radius: 4px; }
-
-    .btn {
-      background: var(--input-bg);
-      color: var(--text-main);
-      border: 1px solid var(--panel-border);
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn:hover { background: #333; }
-    .btn-primary { background: var(--accent); border-color: var(--accent); }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-group { display: flex; gap: 4px; }
-    .btn-group .btn { flex: 1; padding: 6px; }
-    .btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-    /* PALETTE SWATCHES */
-    .palette-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-    .swatch {
-      width: 28px; height: 28px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; position: relative;
-    }
-    .swatch.selected::after {
-      content: ''; position: absolute; inset: -3px; border: 2px solid var(--accent); border-radius: 6px;
-    }
-
-    /* RIGHT PANEL: CANVAS PREVIEW */
-    .preview-panel {
-      flex: 1;
-      background: #0d0d0d;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      padding: 20px;
-    }
-
-    .top-bar {
-      position: absolute;
-      top: 16px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 5;
-    }
-    .action-group { display: flex; gap: 8px; }
-
-    #canvas-container {
-      position: relative;
-      background-color: #F4F4F1;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      overflow: hidden;
-      cursor: default;
-      user-select: none;
-    }
-
-    /* CANVAS ELEMENTS */
-    .poster-element {
-      position: absolute;
-      transform-origin: center center;
-      cursor: move;
-      box-sizing: border-box;
-    }
-    .poster-element.selected {
-      outline: 1.5px dashed var(--accent);
-    }
-    .poster-text {
-      white-space: pre;
-      line-height: 0.9;
-      user-select: none;
-    }
-
-    /* GRID OVERLAY */
-    .grid-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      padding: 6%;
-      gap: 1.5%;
-      opacity: 0.2;
-      z-index: 99;
-    }
-    .grid-col { background: rgba(0,100,255,0.15); border: 1px dashed rgba(0,100,255,0.4); height: 100%; }
-
-    /* LAYER LIST */
-    .layer-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px;
-      background: var(--input-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      margin-bottom: 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .layer-item.selected { border-color: var(--accent); background: #333; }
-  </style>
-</head>
-<body>
-
-<div id="app">
-  <!-- LEFT PANEL: CONTROLS & EDITOR -->
-  <div class="editor-panel">
-    <div class="editor-header">
-      <h1>Poster Lab</h1>
-      <span style="font-size:10px; color:var(--text-muted);">Swiss / Bauhaus Engine</span>
-    </div>
-
-    <div class="editor-tabs">
-      <button class="tab-btn active" onclick="switchTab('templates')">Presets</button>
-      <button class="tab-btn" onclick="switchTab('text')">Type</button>
-      <button class="tab-btn" onclick="switchTab('shapes')">Shapes</button>
-      <button class="tab-btn" onclick="switchTab('colors')">Palette</button>
-      <button class="tab-btn" onclick="switchTab('layers')">Layers</button>
-    </div>
-
-    <!-- TEMPLATES TAB -->
-    <div id="tab-templates" class="tab-content active">
-      <div class="control-group">
-        <label>Geometric Style Presets</label>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button class="btn" onclick="loadTemplate('swiss_modernist')">Swiss Modernist</button>
-          <button class="btn" onclick="loadTemplate('bauhaus')">Bauhaus Structural</button>
-          <button class="btn" onclick="loadTemplate('constructivist')">Constructivist</button>
-          <button class="btn" onclick="loadTemplate('minimal_geometric')">Minimal Geometric</button>
-          <button class="btn" onclick="loadTemplate('editorial')">Editorial Grid</button>
-          <button class="btn" onclick="loadTemplate('experimental')">Experimental Deconstructed</button>
-        </div>
-      </div>
-      <div class="control-group" style="margin-top: 20px;">
-        <label>Grid System Settings</label>
-        <button class="btn" style="width:100%;" onclick="toggleGrid()">Toggle 12-Column Grid Overlay</button>
-      </div>
-    </div>
-
-    <!-- TYPOGRAPHY TAB -->
-    <div id="tab-text" class="tab-content">
-      <div class="control-group">
-        <button class="btn btn-primary" style="width:100%; margin-bottom:12px;" onclick="addText()">+ Add Text Block</button>
-      </div>
-      <div id="text-controls" style="display:none;">
-        <div class="control-group">
-          <label>Text Content</label>
-          <textarea id="text-val" rows="3" oninput="updateSelectedText('text', this.value)"></textarea>
-        </div>
-        <div class="control-group">
-          <label>Font Family</label>
-          <select id="text-font" onchange="updateSelectedText('fontFamily', this.value)">
-            <option value="Helvetica, Arial, sans-serif">Helvetica / Neo-Grotesque</option>
-            <option value="Courier New, monospace">Courier / Monospace</option>
-            <option value="Times New Roman, serif">Times / Serif</option>
-          </select>
-        </div>
-        <div class="control-group">
-          <label>Custom Font (.ttf, .otf, .woff)</label>
-          <input type="file" accept=".ttf,.otf,.woff,.woff2" onchange="uploadFont(event)" style="font-size: 11px;">
-        </div>
-        <div class="control-group">
-          <label>Font Size (Scale Unit 8–276px)</label>
-          <div class="input-row">
-            <input type="range" id="text-size" min="8" max="276" oninput="updateSelectedText('fontSize', this.value + 'px')">
-            <input type="text" id="text-size-val" style="width:50px;" readonly>
-          </div>
-        </div>
-        <div class="control-group">
-          <label>Style & Weight</label>
-          <div class="btn-group">
-            <button class="btn" id="btn-bold" onclick="toggleStyle('fontWeight', 'bold', 'normal')"><b>B</b></button>
-            <button class="btn" id="btn-italic" onclick="toggleStyle('fontStyle', 'italic', 'normal')"><i>I</i></button>
-            <button class="btn" id="btn-underline" onclick="toggleStyle('textDecoration', 'underline', 'none')"><u>U</u></button>
-          </div>
-        </div>
-        <div class="control-group">
-          <label>Text Color</label>
-          <input type="color" id="text-color" onchange="updateSelectedText('color', this.value)">
-        </div>
-      </div>
-    </div>
-
-    <!-- SHAPES TAB -->
-    <div id="tab-shapes" class="tab-content">
-      <div class="control-group">
-        <label>Add Graphic Element</label>
-        <div class="btn-group">
-          <button class="btn" onclick="addShape('rectangle')">Bar / Rect</button>
-          <button class="btn" onclick="addShape('circle')">Circle</button>
-          <button class="btn" onclick="addShape('semicircle')">Semi-Circle</button>
-          <button class="btn" onclick="addShape('line')">Line</button>
-        </div>
-      </div>
-      <div id="shape-controls" style="display:none;">
-        <div class="control-group">
-          <label>Fill Color</label>
-          <input type="color" id="shape-fill" onchange="updateSelectedShape('fill', this.value)">
-        </div>
-        <div class="control-group">
-          <label>Stroke Color & Weight</label>
-          <div class="input-row">
-            <input type="color" id="shape-stroke" onchange="updateSelectedShape('stroke', this.value)">
-            <input type="range" id="shape-stroke-width" min="0" max="30" value="0" oninput="updateSelectedShape('strokeWidth', this.value + 'px')">
-          </div>
-        </div>
-        <div class="control-group">
-          <label>Rotation</label>
-          <div class="input-row">
-            <input type="range" id="shape-rotation" min="0" max="360" value="0" oninput="updateSelectedShape('rotation', this.value)">
-            <span id="rotation-val" style="font-size:12px; width:35px;">0°</span>
-          </div>
-        </div>
-        <div class="control-group">
-          <label>Opacity</label>
-          <input type="range" id="shape-opacity" min="0" max="1" step="0.05" value="1" oninput="updateSelectedShape('opacity', this.value)">
-        </div>
-      </div>
-    </div>
-
-    <!-- COLOR PALETTE TAB -->
-    <div id="tab-colors" class="tab-content">
-      <div class="control-group">
-        <label>Poster Background Color</label>
-        <input type="color" id="bg-color-picker" value="#F4F4F1" onchange="setCanvasBackground(this.value)" style="width:100%;">
-      </div>
-      <div class="control-group">
-        <label>Active Palette Swatches</label>
-        <div class="palette-list" id="palette-swatches"></div>
-        <div class="input-row">
-          <input type="color" id="new-color-val" value="#D62828">
-          <button class="btn" onclick="addPaletteColor()">Add to Palette</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- LAYERS TAB -->
-    <div id="tab-layers" class="tab-content">
-      <div class="control-group">
-        <label>Layer Ordering</label>
-        <div class="btn-group" style="margin-bottom:12px;">
-          <button class="btn" onclick="moveLayer('up')">Bring Forward</button>
-          <button class="btn" onclick="moveLayer('down')">Send Backward</button>
-        </div>
-        <button class="btn" style="width:100%; background:#421515; border-color:#600;" onclick="deleteSelected()">Delete Selected Element</button>
-      </div>
-      <div class="control-group">
-        <label>Canvas Layers</label>
-        <div id="layer-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT PANEL: PREVIEW & CANVAS -->
-  <div class="preview-panel">
-    <div class="top-bar">
-      <div class="action-group">
-        <button class="btn" onclick="undo()">Undo</button>
-        <button class="btn" onclick="redo()">Redo</button>
-      </div>
-      <div class="action-group">
-        <button class="btn" onclick="exportPoster('png')">PNG</button>
-        <button class="btn" onclick="exportPoster('jpg')">JPG</button>
-        <button class="btn btn-primary" onclick="exportPoster('svg')">Export SVG</button>
-      </div>
-    </div>
-
-    <!-- MAIN POSTER CANVAS -->
-    <div id="canvas-container">
-      <div id="grid-overlay" class="grid-overlay" style="display:none;">
-        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
-        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
-        <div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div><div class="grid-col"></div>
-      </div>
-      <div id="canvas-elements"></div>
-    </div>
-  </div>
-</div>
+<div id="main"><div id="vp"><div id="stage"><svg id="svg" viewBox="0 0 1066 1508" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+<div id="tools"><div id="hist"><button id="hUndo" title="Undo (Ctrl+Z)">Undo</button><button id="hRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button id="hReset" title="Reset this template">Reset</button></div><div id="bar"><button id="zi">Zoom in</button><button id="zo">Zoom out</button><button id="z1">100%</button><button id="zf">Fit</button></div></div></div>
 
 <script>
-  // STATE MANAGEMENT
-  let state = {
-    bgColor: '#F4F4F1',
-    elements: [],
-    selectedId: null,
-    palette: ['#000000', '#F4F4F1', '#D62828', '#1D4ED8', '#EA580C']
-  };
+const W=1066,H=1508,SC=[8,11,16,21,28,37,49,65,87,116,155,207,276];
+const DUO='#1D4ED8';
+const FONTS={Inter:'Inter,"Helvetica Neue",Arial,sans-serif',Helvetica:'"Helvetica Neue",Helvetica,Arial,sans-serif','Roboto':'"Roboto",Arial,sans-serif','Open Sans':'"Open Sans",Arial,sans-serif','Montserrat':'"Montserrat",Arial,sans-serif','Poppins':'"Poppins",Arial,sans-serif','Work Sans':'"Work Sans",Arial,sans-serif','Space Grotesk':'"Space Grotesk",Arial,sans-serif','Playfair Display':'"Playfair Display",Georgia,serif','Merriweather':'Merriweather,Georgia,serif','Oswald':'Oswald,"Arial Narrow",sans-serif','Bebas Neue':'"Bebas Neue",Impact,sans-serif'};
+const GF={Inter:{q:'Inter',w:'400;500;700;900'},'Roboto':{q:'Roboto',w:'400;500;700;900'},'Open Sans':{q:'Open+Sans',w:'400;500;700;800'},'Montserrat':{q:'Montserrat',w:'400;500;700;900'},'Poppins':{q:'Poppins',w:'400;500;700;900'},'Work Sans':{q:'Work+Sans',w:'400;500;700;900'},'Space Grotesk':{q:'Space+Grotesk',w:'400;500;700'},'Playfair Display':{q:'Playfair+Display',w:'400;500;700;900'},'Merriweather':{q:'Merriweather',w:'400;700;900'},'Oswald':{q:'Oswald',w:'400;500;700'},'Bebas Neue':{q:'Bebas+Neue',w:null}};const CUSTOM={};
+const PATS={none:'None',stripes:'Stripes',dots:'Dots',grid:'Grid',checks:'Checks'};
+const FX={none:'None',grain:'Grain',paper:'Aged paper',half:'Halftone',duo:'Duotone'};
+const S={ver:1,bg:'#F4F4F1',fg:'#000000',g:1,over:{},del:{},sel:null,selT:null,fx:'none',str:.6,pat:'none',patSize:10,grid:false,snap:true,
+texts:[{"base": 1, "id": 1, "t": "19\u201425.06.15", "x": 121.8, "y": 659.3, "fs": 57.6, "f": "Inter", "w": 500, "col": null, "op": 1, "lh": 1, "tl": [319.0], "sz": 7}, {"base": 1, "id": 2, "t": "prague\nschool\nof\ndesign", "x": 776.0, "y": 1238.1, "fs": 57.6, "f": "Inter", "w": 500, "col": null, "op": 1, "lh": 0.935, "tl": [181.1, 170.5, 52.5, 171.4], "sz": 7}, {"base": 1, "id": 3, "t": "Prague\nSchool\nof Design", "x": 789.1, "y": 573.3, "fs": 21.5, "f": "Inter", "w": 500, "col": null, "op": 1, "lh": 0.947, "tl": [69.8, 65.6, 78.1], "sz": 3}]};
+S.added=[];let aid=2000;let tid=10,view={z:1,x:0,y:0},drag=null;
+const $=i=>document.getElementById(i),svg=$('svg');
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-  const history = [];
-  let historyStep = -1;
+const V1=[[0,"M530.3 1036.7L530.3 1069.7L531.3 1071.0L710.0 1071.0L710.7 1070.3L710.7 1035.7L709.7 1035.0L531.7 1035.0L530.7 1035.7Z",620.7,1053.2,180.7,36.3,6489,0,1],[1,"M60.0 1009.0L60.0 1043.0L61.0 1044.0L169.0 1044.0L170.0 1043.0L170.0 1008.7L169.3 1008.0L61.0 1008.0Z",115.2,1026.2,110.3,36.3,3958,0,0],[2,"M309.0 938.0L310.0 948.3L312.0 959.0L314.0 966.7L318.0 978.0L322.0 986.7L327.3 996.0L334.7 1006.3L343.3 1016.3L353.3 1025.3L365.0 1033.7L371.3 1037.3L384.3 1043.3L394.3 1046.7L409.0 1049.7L419.3 1050.7L428.7 1050.7L440.0 1049.7L450.7 1047.7L463.7 1043.7L473.0 1039.7L481.7 1035.0L491.3 1028.7L500.7 1021.0L508.0 1013.7L515.3 1005.0L521.3 996.3L527.7 985.0L532.7 973.3L535.7 964.0L537.7 955.7L539.7 941.7L540.0 932.3L539.3 931.3L505.7 931.3L504.0 947.0L500.0 961.3L494.0 974.0L489.7 980.7L484.7 987.0L474.3 997.0L469.0 1001.0L461.3 1005.7L454.3 1009.0L445.7 1012.0L436.7 1014.0L430.7 1014.7L418.3 1014.7L412.3 1014.0L399.0 1010.7L392.3 1008.0L384.0 1003.7L376.7 998.7L370.0 993.0L363.7 986.3L359.0 980.3L354.3 973.0L350.7 965.7L346.0 952.0L344.0 941.0L343.7 932.0L343.0 931.3L309.3 931.3Z",424.7,991.2,231.3,119.7,11036,0,0],[3,"M401.7 926.3L400.7 927.3L401.0 935.7L407.0 936.7L410.7 938.0L416.7 942.0L418.7 944.0L422.0 949.0L424.0 955.0L424.0 962.7L422.7 967.0L419.0 973.0L414.7 977.0L409.3 980.0L401.0 981.7L400.7 990.3L401.3 991.0L403.7 991.0L410.7 989.7L417.7 986.7L423.7 982.3L427.3 978.3L429.7 975.0L432.7 968.3L434.0 961.7L434.0 956.0L433.0 950.3L430.7 944.3L428.0 940.0L423.0 934.7L418.0 931.0L412.3 928.3L407.7 927.0Z",417.5,958.8,33.7,65.0,853,0,0],[4,"M371.7 914.0L371.3 963.7L372.3 964.3L380.0 964.3L381.3 963.0L381.3 915.0L380.7 914.0Z",376.5,939.3,10.3,50.7,501,0,0],[5,"M386.7 909.3L385.7 910.7L386.0 939.7L395.3 940.0L395.7 910.3L394.3 909.3Z",390.8,924.8,10.3,31.0,296,0,0],[6,"M309.7 887.0L309.7 895.3L310.3 896.0L335.7 896.0L336.7 895.0L336.7 887.7L336.3 886.7L335.3 886.3L310.3 886.3Z",323.3,891.3,27.3,10.0,259,0,0],[7,"M17.0 865.0L17.7 877.0L19.0 886.3L22.0 899.0L25.3 908.7L32.0 923.0L36.0 929.7L41.3 937.3L50.7 948.3L60.3 957.3L67.3 962.7L75.0 967.7L84.3 972.7L91.3 975.7L102.0 979.3L112.0 981.7L125.3 983.3L139.7 983.3L149.3 982.3L158.0 980.7L171.3 976.7L178.7 973.7L189.0 968.3L199.7 961.3L209.3 953.3L216.3 946.3L223.3 938.0L231.0 926.7L236.7 916.0L241.3 904.7L244.7 893.3L246.7 883.7L248.0 870.0L248.0 864.7L247.0 864.0L213.7 864.3L213.0 874.3L212.0 880.7L210.0 888.7L206.0 899.3L202.0 907.0L197.7 913.7L192.3 920.3L184.7 928.0L178.3 933.0L171.0 937.7L159.3 943.0L153.3 945.0L145.7 946.7L136.3 947.7L128.3 947.7L116.0 946.0L108.7 944.0L100.7 941.0L93.0 937.0L85.0 931.7L74.3 922.0L69.0 915.7L64.3 909.0L58.3 897.3L55.7 890.3L53.3 881.3L52.0 872.3L51.7 864.7L51.0 864.0L18.3 864.0Z",132.7,923.8,231.3,119.7,11046,0,0],[8,"M425.7 852.3L425.7 860.0L426.3 861.0L549.0 861.0L549.7 860.3L549.7 852.0L549.0 851.3L426.7 851.3Z",487.8,856.3,124.3,10.0,1197,0,1],[9,"M415.0 840.7L407.7 842.0L402.0 844.3L396.3 848.0L391.3 853.0L388.0 858.0L385.3 864.7L384.3 870.0L384.3 875.7L385.3 881.3L388.0 888.0L391.7 893.3L395.7 897.3L400.3 900.7L406.0 903.3L410.3 904.7L417.0 905.3L417.7 904.7L417.7 896.3L417.0 895.7L414.7 895.7L407.7 893.7L403.3 891.0L400.0 888.0L397.7 885.0L395.7 881.0L394.3 876.0L394.3 869.7L395.0 866.7L396.7 862.7L399.7 858.3L403.7 854.7L409.0 851.7L412.3 850.7L417.0 850.3L417.7 849.7L417.7 841.3L417.0 840.7Z",401.2,873.2,33.7,65.0,854,0,0],[10,"M518.7 836.3L519.0 845.3L645.0 845.0L645.0 836.3L644.0 835.7L519.7 835.7Z",582.0,840.7,126.7,10.0,1181,0,1],[11,"M361.3 824.0L353.7 826.0L348.3 828.7L343.7 832.0L339.0 837.0L336.3 841.0L334.0 846.3L332.7 853.0L332.7 859.0L334.0 866.0L336.0 870.7L339.0 875.3L343.7 880.3L347.7 883.3L352.7 886.0L358.0 887.7L365.0 888.7L365.7 888.3L366.0 887.0L365.7 879.3L357.7 877.7L351.3 874.0L346.0 868.3L344.3 865.3L342.7 860.3L342.7 852.3L344.7 846.3L347.0 842.7L353.7 836.7L360.3 834.0L365.7 833.3L366.0 825.0L365.3 824.0Z",349.5,856.5,33.7,65.0,854,0,0],[12,"M304.3 806.3L304.7 815.3L377.7 815.0L377.3 806.0Z",341.2,810.8,73.7,9.7,684,0,0],[13,"M368.0 783.3L367.7 792.3L374.7 793.7L382.7 798.0L387.7 803.7L389.7 807.7L391.0 812.7L391.0 818.3L389.0 825.0L386.0 829.7L381.3 834.0L378.0 836.0L373.3 837.7L368.7 838.0L367.7 838.7L367.7 847.3L372.0 847.7L380.7 845.3L384.7 843.3L389.0 840.3L394.0 835.3L397.7 829.7L399.3 825.7L400.7 820.3L401.0 814.7L400.3 809.0L398.7 803.7L395.7 798.0L392.0 793.3L387.7 789.7L381.3 786.0L375.3 784.0Z",384.5,815.7,33.7,64.7,849,0,0],[14,"M396.0 769.3L396.0 777.7L406.0 777.7L406.0 769.3Z",401.2,773.7,11.0,9.3,92,0,0],[15,"M20.3 749.0L21.0 762.7L23.0 774.7L26.0 785.7L29.0 794.0L35.0 806.7L39.3 814.0L50.7 829.0L60.3 838.7L66.3 843.7L76.3 850.7L87.3 856.7L96.7 860.7L106.0 863.7L120.3 866.7L131.3 867.7L140.0 867.7L151.3 866.7L161.7 864.7L173.0 861.3L184.3 856.7L193.0 852.0L204.0 844.7L211.7 838.3L220.0 830.0L228.7 819.3L234.3 810.7L239.7 800.7L243.7 791.3L246.7 782.3L248.7 774.3L250.3 764.7L251.3 753.0L251.3 749.0L250.7 748.3L217.0 748.3L216.0 760.0L214.7 767.3L210.0 781.7L207.0 788.0L201.0 797.7L191.3 809.0L184.0 815.3L177.3 820.0L164.0 826.7L154.3 829.7L147.7 831.0L141.7 831.7L130.0 831.7L122.0 830.7L114.7 829.0L103.7 825.0L96.0 821.0L88.0 815.7L77.7 806.3L72.3 800.0L67.7 793.3L61.3 781.0L58.7 773.7L56.7 766.0L55.0 754.3L55.0 749.0L54.3 748.3L21.0 748.3Z",136.0,808.2,231.3,119.7,11036,0,0],[16,"M447.0 746.3L444.0 746.3L443.3 747.3L443.7 755.3L444.7 756.0L450.0 756.7L455.0 758.7L458.3 761.0L462.0 764.7L463.7 767.0L466.0 772.0L466.7 775.0L466.7 782.3L464.0 789.7L459.7 795.0L456.3 797.7L451.7 800.0L443.7 801.7L443.3 810.0L444.7 811.0L451.7 810.0L456.0 808.7L460.7 806.3L465.7 802.7L469.0 799.3L472.7 794.3L475.7 787.3L476.7 782.3L476.7 775.0L475.7 770.0L474.7 767.0L470.3 759.3L466.7 755.3L460.3 750.7L453.3 747.7Z",460.2,778.8,33.7,65.0,855,0,0],[17,"M413.7 728.3L412.3 727.0L411.7 727.0L363.7 765.3L362.7 764.7L362.7 762.0L361.7 757.0L358.3 749.3L354.7 744.3L351.3 741.0L345.3 737.0L340.7 735.0L333.3 733.3L329.7 733.3L329.3 742.3L337.3 744.0L344.0 747.7L349.0 753.0L351.7 758.0L353.0 766.0L352.0 772.0L349.7 777.0L348.3 779.0L344.0 783.3L337.3 787.0L333.7 788.0L331.0 788.0L329.3 789.0L329.3 797.3L334.0 797.7L338.3 796.7L344.7 794.3L349.0 791.7L354.7 786.7L358.3 781.7L361.7 774.0L363.0 766.7L363.7 766.7L369.0 773.0L370.3 772.7L417.7 735.0L418.0 733.7Z",373.8,762.5,89.0,71.0,1470,0,0],[18,"M443.3 726.3L443.3 734.3L444.3 735.3L513.3 735.3L514.3 734.3L514.3 726.7L513.3 725.7L444.3 725.7Z",479.0,730.7,71.3,10.0,685,0,0],[19,"M466.7 835.7L466.7 840.3L467.3 841.0L500.7 841.0L501.3 840.3L501.7 831.7L503.7 820.7L505.7 813.7L509.7 804.0L513.7 796.7L519.0 789.0L530.0 777.3L535.3 773.0L543.0 768.0L556.0 762.0L568.3 758.7L576.3 757.7L587.7 757.7L597.7 759.0L604.3 760.7L617.7 766.0L625.7 770.7L632.0 775.3L642.0 785.0L650.7 796.7L655.0 804.7L657.7 811.0L660.0 818.0L662.0 827.0L663.3 841.0L697.0 841.0L697.7 840.3L697.7 834.7L695.7 818.3L692.7 806.0L689.3 796.3L683.7 784.0L678.7 775.3L673.0 767.3L666.3 759.3L655.3 748.7L648.0 743.0L639.3 737.3L627.0 731.0L610.7 725.3L599.7 723.0L591.0 722.0L573.3 722.0L567.3 722.7L555.0 725.0L545.0 728.0L531.0 734.0L523.3 738.3L512.3 746.0L505.7 751.7L498.0 759.3L491.3 767.3L482.7 780.3L478.0 789.3L474.0 799.0L470.0 812.0L467.7 824.7Z",582.3,781.7,231.3,119.3,11033,0,0],[20,"M343.0 713.0L343.3 722.0L483.3 722.0L484.0 721.0L484.0 716.3L483.3 712.7Z",413.7,717.5,141.3,9.7,1314,0,1],[21,"M382.7 701.3L383.0 710.3L495.0 710.7L496.0 710.0L495.7 701.0Z",439.5,706.0,113.7,10.0,1060,0,0],[22,"M335.3 698.3L328.3 700.0L322.7 702.7L316.7 707.0L313.0 711.0L310.0 715.7L307.3 722.3L306.3 728.3L306.3 732.7L307.3 738.7L310.0 745.3L313.0 750.0L318.7 755.7L322.0 758.0L327.3 760.7L333.3 762.3L339.3 762.7L339.7 753.7L331.7 752.0L327.3 750.0L324.7 748.0L321.3 744.7L318.7 740.7L317.0 736.7L316.3 733.3L316.3 727.3L317.0 724.3L318.7 720.3L321.3 716.3L324.7 713.0L330.0 709.7L334.0 708.3L339.7 707.3L339.7 698.7Z",323.2,730.7,33.7,64.7,852,0,0],[23,"M352.0 695.3L352.0 703.7L352.7 704.3L373.0 704.3L373.7 703.7L373.7 695.3L372.7 694.7L353.0 694.7Z",363.0,699.7,22.0,10.0,208,0,0],[24,"M261.3 669.0L259.0 669.7L259.0 1052.7L292.7 1053.0L293.7 1052.0L293.7 670.0L293.3 669.3L291.7 669.0Z",276.5,861.2,35.0,384.3,13310,0,1],[25,"M607.0 646.0L601.0 647.3L594.3 650.3L588.7 654.3L584.7 658.7L582.0 662.7L579.0 670.0L578.0 675.3L578.0 681.0L580.3 690.3L583.7 696.3L588.3 701.7L593.7 705.7L599.0 708.3L605.0 710.0L611.0 710.3L611.3 701.7L610.7 701.0L603.3 699.7L599.7 698.0L596.3 695.7L592.7 692.0L590.7 689.0L589.0 685.3L588.0 681.3L588.0 675.0L588.7 672.0L590.7 667.3L592.7 664.3L596.3 660.7L600.3 658.0L605.7 656.0L610.0 655.7L611.3 655.0L611.3 646.3Z",594.8,678.3,33.7,64.7,853,0,0],[26,"M562.7 623.0L561.7 623.0L478.3 680.7L477.3 681.7L477.3 682.7L481.7 688.7L483.0 689.3L566.7 631.7L567.7 630.7L567.7 629.7Z",522.7,656.3,90.7,66.7,1012,1,0],[27,"M113.0 585.7L113.7 587.0L126.7 587.0L127.3 586.3L126.7 585.0L113.7 585.0Z",120.3,586.2,14.7,2.3,28,0,0],[28,"M128.0 568.0L128.0 569.3L129.3 569.7L130.7 567.0L132.7 565.0L136.0 564.3L137.7 565.0L139.7 567.0L141.0 569.7L142.3 569.3L142.3 568.0L141.3 565.7L139.0 563.3L136.7 562.3L133.7 562.3L131.3 563.3L129.3 565.3Z",135.3,566.2,14.7,7.7,40,0,0],[29,"M123.7 562.3L123.0 563.3L123.0 574.0L123.7 574.7L124.7 574.7L125.0 562.7Z",124.2,568.7,2.3,12.7,24,0,0],[30,"M708.7 560.7L708.3 934.0L742.3 934.3L742.7 561.0Z",725.7,747.7,34.7,374.0,12829,0,1],[31,"M149.7 556.0L149.0 557.0L149.0 567.3L149.7 568.3L150.7 568.3L151.0 556.3Z",150.2,562.3,2.3,12.7,24,0,0],[32,"M110.0 666.0L110.0 672.7L111.0 673.3L144.3 673.0L145.0 663.3L146.3 655.3L148.7 646.7L151.0 640.3L154.7 632.7L160.0 624.0L165.7 617.0L173.0 609.7L183.7 601.7L197.7 594.7L203.7 592.7L212.3 590.7L221.0 589.7L229.7 589.7L243.3 591.7L253.3 594.7L258.0 596.7L266.7 601.3L276.3 608.3L284.0 615.7L291.0 624.3L294.7 630.0L301.0 643.3L305.0 657.7L306.0 664.7L306.0 670.0L306.7 673.0L339.7 673.3L341.0 672.0L340.7 663.0L339.7 654.7L336.7 640.7L333.3 630.3L330.0 622.3L323.7 610.3L317.7 601.3L310.7 592.7L303.7 585.3L294.7 577.7L286.7 572.0L278.3 567.0L270.0 563.0L256.0 558.0L244.0 555.3L233.3 554.0L218.0 554.0L209.0 555.0L198.7 557.0L187.7 560.3L178.7 564.0L165.7 571.0L155.7 578.0L148.7 584.0L141.7 591.0L133.7 600.7L127.0 610.7L121.0 622.0L116.0 634.7L114.0 641.3L111.0 656.0Z",225.7,613.8,231.3,119.7,11025,0,0],[33,"M141.7 549.0L141.3 558.3L143.0 558.7L143.3 549.3Z",142.5,554.0,2.3,10.0,19,0,0],[34,"M137.7 548.7L136.7 548.7L132.7 554.3L132.3 556.0L133.0 556.7L134.3 556.0L138.3 549.7Z",135.5,552.8,6.3,8.3,18,0,0],[35,"M140.7 544.3L141.3 545.7L143.7 545.3L143.3 543.7L141.3 543.7Z",142.3,544.8,3.3,2.3,5,0,0],[36,"M194.7 548.3L194.7 550.0L196.3 550.3L197.0 548.0L199.3 545.7L202.7 545.0L204.3 545.7L206.3 547.7L207.3 550.3L208.7 550.3L209.0 549.7L208.7 547.7L207.7 546.0L205.7 544.0L203.3 543.0L200.3 543.0L198.0 544.0L196.3 545.3Z",202.0,546.8,14.7,7.7,40,0,0],[37,"M161.7 548.3L161.7 550.0L163.0 550.3L164.3 547.3L165.7 546.0L167.7 545.0L169.3 545.0L171.3 545.7L173.0 547.3L174.3 550.3L175.7 550.3L175.7 548.0L174.3 545.7L173.0 544.3L170.3 543.0L167.0 543.0L164.3 544.3L163.0 545.7Z",168.8,546.8,14.3,7.7,40,0,0],[38,"M146.7 542.7L148.0 546.3L150.7 548.7L152.7 549.3L155.3 549.3L157.3 548.7L159.7 546.7L161.0 544.0L161.0 542.3L159.7 542.0L159.0 542.7L158.7 544.3L156.0 547.0L153.0 547.3L151.3 546.7L149.3 544.7L148.3 542.0L147.3 542.0Z",154.0,545.8,14.7,7.7,40,0,0],[39,"M178.0 540.3L179.0 543.7L181.3 546.0L183.3 547.0L187.0 547.0L189.3 546.0L191.3 544.0L192.3 541.7L192.3 540.0L190.7 540.0L189.7 542.7L188.0 544.3L186.7 545.0L183.7 545.0L180.7 542.3L179.7 540.0L179.0 539.7Z",185.3,543.5,14.7,7.7,40,0,0],[40,"M120.3 539.7L121.7 543.7L124.0 545.7L126.7 546.7L129.7 546.3L131.7 545.3L133.3 543.7L134.7 541.0L134.7 539.7L133.7 539.0L133.0 539.3L132.0 542.0L130.3 543.7L129.0 544.3L126.0 544.3L123.3 542.3L122.0 539.3L121.3 539.0Z",127.7,543.0,14.7,8.0,40,0,0],[41,"M216.0 534.7L215.3 536.0L215.7 546.0L217.0 546.3L217.7 545.3L217.7 535.7L217.0 534.7Z",216.7,540.7,2.7,12.0,23,0,0],[42,"M146.7 533.7L148.0 537.3L150.7 539.7L152.7 540.3L155.3 540.3L157.7 539.3L159.7 537.7L161.0 535.0L161.0 533.3L159.7 533.0L159.0 533.7L158.7 535.3L156.0 538.0L153.0 538.3L151.3 537.7L149.7 536.0L148.3 533.0L147.3 533.0Z",154.0,536.8,14.7,7.7,40,0,0],[43,"M116.7 531.7L116.3 564.0L117.7 564.7L118.3 564.3L118.3 532.0Z",117.5,548.3,2.3,33.3,65,0,0],[44,"M120.3 529.7L121.7 533.7L124.0 535.7L126.7 536.7L129.7 536.3L131.7 535.3L133.3 533.7L134.7 531.0L134.7 529.7L133.7 529.0L133.0 529.3L132.0 532.0L130.3 533.7L127.3 534.7L124.7 533.7L123.0 532.0L122.0 529.3L121.3 529.0Z",127.7,533.0,14.7,8.0,40,0,0],[45,"M187.3 526.7L187.3 528.3L189.0 531.3L192.7 533.7L196.0 533.7L198.3 532.7L200.3 530.7L201.7 527.0L200.3 526.3L199.0 529.0L197.0 531.0L195.3 531.7L193.3 531.7L190.0 529.3L188.7 526.3Z",194.7,530.2,14.7,7.7,40,0,0],[46,"M208.7 524.0L208.0 525.0L208.0 530.0L208.3 530.7L209.7 530.7L210.0 524.7Z",209.2,527.5,2.3,7.0,13,0,0],[47,"M154.0 530.0L155.0 531.3L156.0 530.7L156.7 528.7L158.0 527.0L160.0 526.0L162.7 526.0L166.0 528.7L167.3 531.3L168.7 530.3L167.3 527.0L165.3 525.0L163.3 524.0L158.3 524.3L155.3 527.0Z",161.5,527.8,15.0,7.7,39,0,0],[48,"M148.3 524.0L147.3 523.7L146.0 525.0L139.3 535.3L139.0 536.3L139.7 537.0L140.7 537.0L148.3 525.7Z",144.0,530.5,10.0,13.7,31,0,0],[49,"M172.3 523.3L172.0 536.3L173.3 536.7L174.0 536.0L174.0 524.3L173.3 523.3Z",173.2,530.2,2.3,13.7,26,0,0],[50,"M127.7 525.7L128.0 526.7L129.0 527.0L130.3 524.3L132.3 522.3L133.7 521.7L136.3 521.7L139.0 523.7L140.3 526.7L142.0 526.7L141.7 524.0L139.3 521.0L136.7 519.7L133.3 519.7L131.0 520.7L128.7 523.0Z",135.0,523.5,14.7,7.7,40,0,0],[51,"M182.7 518.7L182.0 519.3L182.0 521.0L182.7 521.7L183.7 521.7L184.0 519.0Z",183.2,520.3,2.3,3.3,5,0,0],[52,"M168.3 516.0L167.7 517.0L167.7 522.0L168.0 522.7L169.3 522.7L169.7 516.7Z",168.8,519.5,2.3,7.0,13,0,0],[53,"M609.3 515.0L608.7 515.7L608.7 610.7L609.3 611.7L642.3 611.7L643.3 611.0L643.3 515.7L642.3 515.0Z",626.2,563.5,35.0,97.0,3350,0,0],[54,"M192.0 517.7L192.0 519.3L193.3 519.7L194.7 517.0L196.7 515.0L200.0 514.3L201.7 515.0L203.7 517.0L205.0 519.7L206.0 519.7L206.3 519.0L205.3 515.7L203.3 513.7L200.7 512.3L197.7 512.3L195.3 513.3L194.0 514.3Z",199.3,516.2,14.7,7.7,40,0,0],[55,"M146.7 515.7L147.0 516.7L148.3 516.7L149.7 513.7L151.3 512.0L153.3 511.3L156.0 511.7L158.7 514.3L159.0 516.0L159.7 516.7L161.0 516.3L161.0 514.7L159.7 512.0L157.3 510.0L155.3 509.3L152.7 509.3L150.7 510.0L148.0 512.3Z",154.0,513.2,14.7,7.7,40,0,0],[56,"M164.0 509.0L163.7 520.3L165.0 520.7L165.7 520.0L165.7 509.7L165.3 509.0Z",164.8,515.0,2.3,12.0,23,0,0],[57,"M169.0 507.3L169.3 509.0L182.3 509.0L183.0 508.3L182.3 507.0Z",176.2,508.2,14.3,2.3,27,0,0],[58,"M112.7 502.7L113.3 503.7L171.7 503.3L171.7 502.3L171.0 501.7L113.7 501.7Z",142.3,502.8,59.3,2.3,117,0,0],[59,"M164.7 498.0L165.3 499.3L178.3 499.3L179.0 498.7L178.7 497.3L165.0 497.3Z",172.0,498.5,14.7,2.3,28,0,0],[60,"M204.0 496.0L203.3 496.0L199.0 502.0L199.0 503.7L200.7 503.7L204.7 497.7L204.7 496.7Z",202.0,500.2,6.0,8.3,18,0,0],[61,"M217.3 492.7L216.7 493.7L216.7 525.0L217.3 525.7L218.3 525.7L218.7 493.0Z",217.8,509.3,2.3,33.3,55,0,0],[62,"M666.0 490.7L665.3 491.7L665.3 730.3L666.0 731.3L699.3 731.3L700.0 730.7L700.0 491.0Z",682.8,611.2,35.0,241.0,8342,0,1],[63,"M70.3 487.7L69.3 488.3L69.3 738.7L70.0 739.3L103.3 739.3L104.0 738.3L104.0 488.7L103.0 487.7Z",86.8,613.7,35.0,252.0,8718,0,1],[64,"M643.0 445.3L642.3 445.3L633.3 454.3L633.3 455.3L634.0 455.3L643.0 446.7Z",638.3,450.5,10.0,10.3,16,1,0],[65,"M627.3 434.0L626.7 435.0L627.0 441.7L627.7 441.7L628.3 440.7L628.0 437.3L629.7 435.0L630.7 435.3L631.7 436.7L631.7 441.3L632.7 441.7L632.7 435.0L631.3 434.0Z",630.0,438.0,6.7,8.0,25,0,0],[66,"M465.0 417.3L450.7 419.0L442.0 421.0L431.7 424.3L423.0 428.0L415.3 432.0L404.0 439.3L393.7 448.0L384.3 457.7L377.7 466.3L371.3 476.3L366.7 485.3L362.3 496.0L360.0 503.3L357.0 517.0L355.7 530.3L355.7 543.0L357.0 556.3L359.0 566.0L363.0 579.3L366.7 588.0L371.3 597.0L377.7 607.0L384.7 616.0L394.0 625.7L402.3 632.7L409.3 637.7L417.7 642.7L430.7 648.7L439.3 651.7L452.7 654.7L464.7 656.0L477.0 656.0L485.0 655.3L499.0 652.7L516.3 646.7L528.0 640.7L540.3 632.3L546.7 627.0L555.7 618.0L564.0 607.7L570.7 597.3L575.7 587.7L579.7 577.7L583.7 564.0L585.7 552.7L585.7 549.3L586.3 546.3L586.7 532.7L585.7 520.7L584.0 511.0L581.7 501.7L575.7 485.7L570.7 476.0L564.0 465.7L558.0 458.0L550.7 450.0L540.7 441.3L530.7 434.3L517.7 427.3L509.7 424.0L496.0 420.0L485.0 418.0L477.0 417.3ZM460.7 453.7L473.3 453.0L483.7 454.0L491.3 455.7L498.7 458.0L507.0 461.7L511.7 464.3L520.7 470.7L529.3 478.7L534.7 485.0L538.0 489.7L543.0 498.3L546.0 505.0L549.0 514.0L551.7 528.3L551.7 544.7L550.7 552.3L549.0 559.3L544.0 573.0L538.7 582.7L534.7 588.3L528.0 596.0L522.3 601.3L510.0 610.0L502.0 614.0L495.0 616.7L487.3 618.7L479.0 620.0L463.3 620.0L456.3 619.0L448.3 617.0L441.7 614.7L433.3 610.7L422.7 603.7L411.0 592.7L405.3 585.3L400.3 577.3L397.7 572.0L393.7 561.3L390.7 547.0L390.3 530.7L391.0 524.0L392.7 515.7L395.0 508.0L398.0 500.7L401.7 493.7L407.0 485.7L411.3 480.3L418.7 473.0L424.0 468.7L431.0 464.0L439.3 459.7L444.3 457.7L454.7 454.7Z",471.3,536.8,231.3,239.0,43291,2,0],[67,"M567.7 390.7L566.7 391.0L558.0 400.0L558.3 400.7L559.0 400.7L568.0 391.7Z",563.2,395.8,10.3,10.3,18,1,0],[68,"M604.0 352.7L603.0 353.3L602.0 386.7L607.0 387.3L608.3 386.3L609.3 353.3Z",605.8,370.2,7.7,35.0,217,0,0],[69,"M225.7 323.0L227.0 335.3L230.0 349.0L233.3 359.0L237.7 369.0L243.3 379.3L251.0 390.3L260.7 401.3L266.0 406.3L276.7 414.7L285.7 420.3L293.3 424.3L304.0 428.7L314.0 431.7L324.0 433.7L332.7 434.7L349.0 434.7L358.3 433.7L369.3 431.3L378.0 428.7L390.0 423.7L401.3 417.3L410.3 411.0L420.7 402.0L431.3 390.0L438.7 379.3L442.3 373.0L447.7 361.7L447.7 360.7L450.7 353.3L453.7 342.3L455.7 331.0L456.7 316.7L456.0 315.7L422.3 315.7L420.0 334.0L416.0 347.0L413.0 353.7L408.0 362.3L402.0 370.3L398.3 374.3L387.3 384.0L378.3 389.7L373.7 392.0L363.0 396.0L354.7 398.0L345.7 399.0L332.3 398.7L322.7 397.0L315.0 394.7L307.7 391.7L299.7 387.3L293.3 383.0L286.3 377.0L280.3 370.7L274.0 362.3L269.7 355.0L267.0 349.3L263.7 340.3L260.7 326.3L260.3 316.7L259.7 315.7L226.0 315.7Z",341.3,375.3,231.3,119.3,11026,0,0],[70,"M601.3 288.3L601.0 294.0L602.0 294.7L604.7 294.7L607.3 295.7L611.3 298.3L615.0 303.3L616.0 306.0L616.3 309.3L615.7 313.7L612.7 319.0L607.3 323.0L601.0 324.7L601.0 330.0L604.3 330.3L610.0 328.7L614.0 326.3L618.7 321.7L621.7 316.0L622.7 311.7L622.7 307.0L621.7 302.7L620.0 299.0L616.0 294.0L613.0 291.7L607.3 289.0Z",612.0,309.5,22.0,42.3,361,0,0],[71,"M86.3 278.0L86.0 398.0L120.0 398.3L120.7 397.0L120.3 278.3Z",103.5,338.3,35.0,120.7,4170,0,0],[72,"M512.3 271.7L512.3 276.0L513.3 277.0L607.3 277.0L608.3 276.3L608.3 271.7L607.3 270.7L513.3 270.7Z",560.5,274.0,96.3,6.7,606,0,0],[73,"M504.3 261.7L504.3 267.0L505.3 267.7L597.0 267.7L597.7 267.0L597.3 261.3Z",551.2,264.7,93.7,6.7,590,0,0],[74,"M558.0 252.0L558.3 257.7L609.3 257.3L609.0 251.7Z",583.8,254.8,51.7,6.3,308,0,0],[75,"M615.7 236.7L615.0 237.3L615.0 242.3L615.7 243.0L620.0 243.7L624.3 246.0L627.7 249.3L628.7 251.0L630.3 256.3L630.0 261.7L627.7 266.3L623.0 270.7L620.3 272.0L616.0 272.7L615.0 273.3L615.0 278.3L615.7 279.0L617.3 279.0L623.0 277.7L626.3 276.0L630.0 273.3L632.7 270.3L636.0 263.7L636.7 261.0L636.7 255.0L634.3 248.0L632.7 245.3L629.0 241.7L622.7 238.0Z",626.0,258.0,22.0,42.7,362,0,0],[76,"M135.0 330.7L135.0 337.7L135.7 338.0L169.0 338.0L169.7 337.3L170.0 328.0L171.7 318.7L173.7 311.3L176.7 303.7L180.7 295.7L185.7 288.0L192.0 280.3L196.7 275.7L203.0 270.3L211.0 265.0L224.0 259.0L231.7 256.7L240.7 255.0L257.3 254.7L264.3 255.7L272.7 257.7L278.7 259.7L287.3 263.7L292.0 266.3L300.3 272.3L310.3 282.0L315.7 288.7L320.0 295.3L325.3 306.3L328.0 314.0L330.0 322.7L331.0 329.7L331.3 337.7L365.3 338.0L366.0 337.0L365.7 328.0L363.7 314.0L360.7 302.0L358.0 294.3L353.7 284.3L347.3 273.0L342.3 265.7L334.3 256.0L327.3 249.0L316.3 240.0L306.0 233.3L298.3 229.3L288.7 225.3L278.0 222.0L263.3 219.3L252.7 218.7L240.3 219.0L232.7 220.0L221.7 222.3L210.3 226.0L197.3 232.0L189.3 236.7L179.7 243.7L171.0 251.3L161.7 261.7L155.0 270.7L150.0 279.0L145.3 288.3L140.0 302.7L137.7 311.7L136.0 320.7Z",250.7,278.5,231.3,119.7,11036,0,0],[77,"M497.3 208.3L496.7 209.0L496.7 214.3L497.3 214.7L536.7 214.7L538.0 215.3L529.3 218.0L526.3 220.0L522.7 223.7L521.0 226.0L519.0 230.3L518.3 233.3L518.3 240.0L519.0 243.0L520.7 246.7L522.7 249.7L526.0 253.0L532.7 256.7L536.7 257.7L539.3 257.7L540.0 257.0L539.7 252.0L534.3 250.7L530.7 248.7L526.7 244.3L524.7 239.0L524.7 234.0L526.0 230.0L527.3 228.0L531.7 224.0L536.3 222.0L539.3 221.7L540.0 221.0L540.0 216.3L539.3 215.3L539.3 208.7Z",518.5,233.2,43.7,49.7,635,0,0],[78,"M557.7 185.0L557.3 190.3L559.0 191.3L563.0 192.0L566.7 194.0L570.7 198.3L572.0 201.0L573.0 205.7L572.0 211.0L568.7 216.3L563.3 220.0L560.0 221.0L558.0 221.0L557.3 221.7L557.7 227.0L561.0 227.0L568.0 224.7L571.0 222.7L575.0 218.7L578.3 212.3L579.0 209.3L579.0 202.7L576.7 196.0L574.3 192.7L571.7 190.0L568.3 187.7L564.7 186.0L560.7 185.0Z",568.3,206.2,22.0,42.3,361,0,0],[79,"M622.7 177.7L619.3 178.3L615.3 180.0L611.0 183.0L608.0 186.3L605.7 190.3L604.3 194.3L604.0 201.7L606.7 209.0L611.3 214.7L614.0 216.7L618.3 218.7L622.0 219.7L625.3 219.7L625.7 214.0L620.0 212.7L615.7 210.0L611.7 205.0L610.3 200.0L611.0 194.0L613.7 189.3L618.7 185.3L625.7 183.3L625.7 178.0Z",615.0,198.8,22.0,42.3,361,0,0],[80,"M408.7 177.7L382.0 197.0L382.0 198.3L521.7 391.7L522.7 391.7L549.7 372.0L549.7 370.7L410.0 177.3Z",466.0,284.7,168.0,214.7,8375,0,1],[81,"M582.0 169.0L581.3 169.3L581.3 175.0L587.0 176.3L591.0 178.7L594.7 183.0L596.0 186.0L596.7 189.3L596.0 194.7L594.0 198.7L589.3 203.0L585.7 204.7L582.3 205.0L581.3 205.7L581.3 211.0L584.0 211.3L587.3 210.7L592.0 208.7L595.0 206.7L598.7 203.0L600.7 200.0L602.3 195.7L603.0 188.7L602.3 184.7L601.0 181.3L599.0 178.0L596.0 174.7L589.7 170.7Z",592.2,190.3,22.3,42.7,360,0,0],[82,"M580.0 148.0L575.3 149.3L572.0 151.0L569.7 152.7L565.3 157.3L563.0 161.7L562.0 165.3L562.0 172.7L563.0 176.3L565.0 180.3L569.7 185.3L575.3 188.7L578.3 189.7L583.3 190.0L583.7 184.7L583.0 184.0L578.0 183.0L574.3 181.0L570.3 176.7L568.3 171.7L568.7 165.0L571.0 160.3L576.3 155.7L578.7 154.7L583.0 154.0L583.7 153.3L583.3 148.0Z",573.0,169.2,22.0,42.3,362,0,0],[83,"M561.3 145.7L559.7 146.0L516.0 174.3L515.7 175.7L518.3 179.3L519.7 179.7L564.3 150.7L564.3 149.7Z",540.2,162.8,49.0,34.3,343,0,0],[84,"M520.0 124.0L516.0 125.0L512.3 126.7L509.3 128.7L505.0 133.3L503.0 137.0L502.0 140.3L501.7 148.3L503.0 153.0L504.3 155.7L507.0 159.3L512.7 163.7L517.7 165.7L523.0 166.0L523.3 160.7L522.7 160.0L519.3 159.7L516.7 158.7L514.0 157.0L510.0 152.7L508.0 147.7L508.0 142.3L509.0 139.3L511.3 135.7L515.7 132.0L518.7 130.7L522.7 130.0L523.3 129.3L523.3 124.7L522.7 124.0Z",512.7,145.2,22.0,42.3,361,0,0],[85,"M554.3 97.0L551.3 97.3L551.3 102.7L557.3 104.3L561.0 106.7L564.3 110.3L566.0 114.0L566.7 118.0L566.0 122.3L564.0 126.3L559.0 131.0L555.0 132.7L551.7 133.0L551.0 133.7L551.0 138.3L552.0 139.3L556.7 138.7L559.7 137.7L566.0 133.7L570.7 127.7L572.3 123.3L573.0 118.3L572.7 114.0L571.7 110.7L568.7 105.3L565.0 101.7L561.3 99.3Z",562.2,118.3,22.3,42.7,363,0,0],[86,"M155.7 96.3L156.0 108.3L158.0 121.0L161.0 132.3L164.3 141.7L173.0 159.0L181.3 171.0L187.3 178.0L197.7 188.0L206.3 194.7L214.7 200.0L224.3 205.0L235.3 209.3L247.3 212.7L260.0 214.7L276.3 215.0L287.0 214.0L294.7 212.7L308.7 208.7L317.0 205.3L329.0 199.0L338.0 193.0L346.7 186.0L355.7 177.0L360.7 171.0L367.3 161.7L374.7 148.7L379.7 136.7L382.7 126.7L385.3 113.7L386.3 104.0L386.3 96.3L385.3 95.7L352.0 96.0L351.7 103.7L350.0 114.0L348.7 119.3L345.0 129.7L341.0 137.7L335.7 146.0L327.0 156.0L319.3 162.7L312.7 167.3L300.3 173.7L293.7 176.0L285.7 178.0L278.7 179.0L270.3 179.3L256.3 178.0L248.3 176.0L238.7 172.3L231.0 168.3L224.0 163.7L219.0 159.7L211.3 152.0L205.7 145.0L202.0 139.3L195.7 126.3L191.7 112.7L191.7 110.3L190.7 106.3L190.0 96.0L156.7 95.7Z",271.2,155.5,231.0,119.7,11042,0,0],[87,"M656.3 75.0L655.0 76.0L655.0 457.0L655.7 457.7L689.3 457.7L689.7 75.7L689.0 75.0Z",672.5,266.5,35.0,383.0,13265,0,1],[88,"M413.7 158.0L413.7 165.3L414.3 165.7L447.7 165.7L448.3 164.7L448.3 159.0L449.7 149.0L452.0 140.0L454.7 132.7L457.7 126.3L463.3 117.0L469.7 109.0L476.0 102.7L488.0 93.7L495.3 89.7L501.7 87.0L511.7 84.0L519.3 82.7L535.3 82.3L541.0 83.0L550.3 85.0L557.3 87.3L566.7 91.7L573.7 96.0L579.3 100.3L588.7 109.3L593.3 115.0L598.0 122.0L602.7 131.0L605.0 136.7L606.0 141.0L607.0 143.0L609.0 152.3L610.3 165.7L644.0 165.7L644.7 164.7L643.7 149.7L642.7 143.7L639.7 131.0L636.7 122.0L629.7 107.0L625.3 99.7L620.0 92.0L612.7 83.3L603.0 74.0L592.7 66.0L584.7 61.0L573.3 55.3L561.3 51.0L553.7 49.0L542.3 47.0L532.7 46.3L520.0 46.7L509.3 48.0L500.3 50.0L490.7 53.0L483.3 56.0L470.7 62.7L458.7 71.0L450.7 78.0L443.3 85.7L436.7 94.0L430.7 103.0L425.0 113.7L421.3 122.3L418.0 132.3L415.0 146.0Z",529.3,106.2,231.3,119.7,11038,0,0],[89,"M59.0 30.7L26.0 31.0L25.3 32.0L25.3 541.3L26.0 542.7L60.0 542.3L60.0 31.3Z",42.8,286.8,35.0,512.3,17737,0,1],[90,"M716.7 26.7L716.0 27.3L716.0 542.0L750.3 542.3L750.7 27.3L750.0 26.7Z",733.5,284.7,35.0,516.0,17876,0,1],[91,"M69.3 128.3L69.3 133.3L70.0 134.0L103.3 134.0L104.0 133.3L104.0 128.3L105.7 116.3L110.0 102.0L116.7 89.0L121.3 82.3L128.7 74.0L135.3 68.0L143.3 62.3L156.7 55.7L170.7 51.7L178.3 50.7L191.3 50.7L200.3 52.0L210.3 54.7L222.3 60.0L234.7 68.3L245.0 78.3L250.0 84.7L254.3 91.3L259.7 102.3L262.3 110.0L265.0 122.0L265.7 133.3L266.3 134.0L299.7 134.0L300.3 133.3L299.7 120.0L298.3 111.3L296.7 103.7L292.7 91.0L286.3 77.0L280.7 67.3L274.7 59.0L269.0 52.3L257.7 41.3L250.7 36.0L240.3 29.3L232.0 25.0L223.0 21.3L209.3 17.3L194.7 15.0L185.7 14.7L175.0 15.0L161.7 17.0L153.7 19.0L142.3 23.0L131.7 28.0L124.3 32.3L116.7 37.7L108.7 44.3L100.7 52.3L92.7 62.0L85.3 73.3L80.0 83.7L76.0 93.7L73.0 103.7L70.0 119.7Z",185.0,74.5,231.3,119.7,11035,0,0]];
+const V2X=[[1000,"M383.4 292.2L383.4 752.2L375.4 752.2L375.4 292.2Z",379.4,522.2,8.0,460.0,3680,0,1],[1001,"M234.6 878.1L694.6 878.1L694.6 896.1L234.6 896.1Z",464.6,887.1,460.0,18.0,8280,0,1],[1002,"M570.0 227.0L570.0 687.0L552.0 687.0L552.0 227.0Z",561.0,457.0,18.0,460.0,8280,0,1],[1003,"M70.3 207.5L470.3 207.5L470.3 219.5L70.3 219.5Z",270.3,213.5,400.0,12.0,4800,0,1],[1004,"M217.5 108.2L617.5 108.2L617.5 134.2L217.5 134.2Z",417.5,121.2,400.0,26.0,10400,0,1],[1005,"M218.2 268.6L218.2 668.6L210.2 668.6L210.2 268.6Z",214.2,468.6,8.0,400.0,3200,0,1],[1006,"M116.0 655.1L401.1 840.3L394.6 850.4L109.5 665.2Z",255.3,752.7,291.7,195.2,4080,0,1],[1007,"M99.1 971.8L439.1 971.8L439.1 979.8L99.1 979.8Z",269.1,975.8,340.0,8.0,2720,0,1],[1008,"M485.0 241.3L485.0 581.3L450.0 581.3L450.0 241.3Z",467.5,411.3,35.0,340.0,11900,0,1],[1009,"M128.1 247.6L128.1 537.6L110.1 537.6L110.1 247.6Z",119.1,392.6,18.0,290.0,5220,0,1],[1010,"M386.4 771.0L676.4 771.0L676.4 797.0L386.4 797.0Z",531.4,784.0,290.0,26.0,7540,0,1],[1011,"M662.2 458.2L662.2 708.2L644.2 708.2L644.2 458.2Z",653.2,583.2,18.0,250.0,4500,0,1],[1012,"M391.5 186.9L641.5 186.9L641.5 191.9L391.5 191.9Z",516.5,189.4,250.0,5.0,1250,0,1],[1013,"M302.1 352.2L302.1 602.2L284.1 602.2L284.1 352.2Z",293.1,477.2,18.0,250.0,4500,0,1],[1014,"M59.3 831.6L274.3 831.6L274.3 849.6L59.3 849.6Z",166.8,840.6,215.0,18.0,3870,0,1],[1015,"M465.4 986.0L680.4 986.0L680.4 994.0L465.4 994.0Z",572.9,990.0,215.0,8.0,1720,0,1],[1016,"M662.6 187.0L662.6 402.0L657.6 402.0L657.6 187.0Z",660.1,294.5,5.0,215.0,1075,0,1],[1017,"M65.4 67.8L217.0 173.9L214.1 178.0L62.6 71.9Z",139.8,122.9,154.4,110.2,925,0,1],[1018,"M525.4 926.5L710.4 926.5L710.4 961.5L525.4 961.5Z",617.9,944.0,185.0,35.0,6475,0,1],[1019,"M86.9 268.7L86.9 453.7L60.9 453.7L60.9 268.7Z",73.9,361.2,26.0,185.0,4810,0,1],[1020,"M181.2 346.0L181.2 506.0L163.2 506.0L163.2 346.0Z",172.2,426.0,18.0,160.0,2880,0,1],[1021,"M58.0 913.0L218.0 913.0L218.0 921.0L58.0 921.0Z",138.0,917.0,160.0,8.0,1280,0,1],[1022,"M478.2 602.7L478.2 737.7L443.2 737.7L443.2 602.7Z",460.7,670.2,35.0,135.0,4725,0,1],[1023,"M70.7 761.1L205.7 761.1L205.7 787.1L70.7 787.1Z",138.2,774.1,135.0,26.0,3510,0,1],[1024,"M331.0 589.2L331.0 724.2L326.0 724.2L326.0 589.2Z",328.5,656.7,5.0,135.0,675,0,1],[1025,"M243.1 274.9L353.1 274.9L353.1 286.9L243.1 286.9Z",298.1,280.9,110.0,12.0,1320,0,1],[1026,"M75.9 581.9L185.9 581.9L185.9 607.9L75.9 607.9Z",130.9,594.9,110.0,26.0,2860,0,1],[1027,"M706.9 97.0L706.9 207.0L680.9 207.0L680.9 97.0Z",693.9,152.0,26.0,110.0,2860,0,1],[1028,"M50.3 709.9L140.3 709.9L140.3 714.9L50.3 714.9Z",95.3,712.4,90.0,5.0,450,0,1],[1029,"M626.2 355.0L626.2 445.0L608.2 445.0L608.2 355.0Z",617.2,400.0,18.0,90.0,1620,0,1],[1030,"M287.6 630.8L287.6 702.8L275.6 702.8L275.6 630.8Z",281.6,666.8,12.0,72.0,864,0,1],[1031,"M495.3 727.3L567.3 727.3L567.3 732.3L495.3 732.3Z",531.3,729.8,72.0,5.0,360,0,1],[1032,"M599.8 262.3L640.1 301.2L631.7 309.8L591.4 270.9Z",615.8,286.0,48.6,47.5,672,0,1],[1033,"M162.6 63.5L162.6 107.5L157.6 107.5L157.6 63.5Z",160.1,85.5,5.0,44.0,220,0,1]];
+const PACK={"4":{"90":[300.6,782.5,270,-1,-1,0.9],"89":[335.7,317.4,0,1,1,0.9],"24":[550.4,155.3,90,1,-1,0.9],"87":[679.9,738.3,0,1,1,0.9],"30":[253.5,667.0,90,1,-1,0.9],"63":[501.0,536.0,0,-1,1,0.9],"62":[412.5,936.3,270,-1,-1,0.9],"66":[187.5,510.7,90,1,1,0.9],"2":[174.0,1001.6,0,1,-1,0.9],"7":[130.4,335.2,180,1,1,0.9],"15":[513.3,254.5,0,-1,-1,0.9],"19":[587.1,933.2,90,1,1,0.9],"32":[614.7,466.4,90,1,1,0.9],"69":[92.8,145.7,270,-1,-1,0.9],"76":[163.1,873.0,0,-1,-1,0.9],"88":[213.7,183.8,270,1,1,0.8],"91":[596.2,669.5,270,1,1,0.8],"86":[485.1,74.7,180,1,1,0.8],"80":[685.7,347.4,180,-1,-1,0.6],"0":[399.5,467.4,270,-1,-1,0.9],"71":[424.2,352.5,270,-1,1,0.9],"1":[679.9,207.9,0,-1,-1,0.9],"53":[423.2,1015.5,180,1,1,0.9]},"5":{"90":[486.6,325.4,270,-1,1,0.7],"89":[258.1,812.3,270,1,-1,0.9],"24":[603.3,691.8,180,1,-1,0.7],"87":[145.3,587.7,0,-1,1,0.9],"30":[549.6,672.4,0,1,1,0.8],"63":[167.1,987.3,270,1,1,0.8],"62":[719.9,194.1,0,1,1,0.7],"66":[384.0,543.0,0,-1,-1,1.15],"2":[475.7,158.9,0,-1,1,0.8],"7":[426.6,959.0,270,1,1,0.8],"15":[222.0,159.8,0,-1,-1,0.7],"19":[623.7,932.5,90,1,-1,0.9],"32":[190.5,300.6,180,1,1,0.9],"69":[606.5,433.7,180,1,-1,0.9],"76":[160.2,900.8,0,1,-1,0.9],"88":[70.1,457.4,90,1,1,0.7],"91":[610.9,130.6,90,1,1,0.8],"86":[686.3,605.6,90,1,1,0.7],"80":[90.9,164.6,0,1,-1,0.7],"0":[440.2,66.8,180,-1,-1,0.8],"71":[423.6,761.0,270,-1,-1,0.7],"1":[41.0,658.0,90,-1,-1,0.7],"53":[721.6,778.8,0,-1,-1,0.7]},"6":{"90":[584.7,599.0,0,1,1,0.85],"89":[470.1,794.6,0,1,-1,0.85],"24":[298.0,403.3,270,-1,1,0.85],"87":[699.4,459.2,0,-1,-1,0.85],"30":[68.7,878.5,0,-1,-1,0.85],"63":[642.1,459.2,180,1,1,0.85],"62":[384.0,654.9,180,-1,-1,0.85],"66":[269.4,822.6,180,-1,1,0.85],"900":[498.7,179.8,0,-1,-1,0.85],"2":[240.7,235.7,180,1,1,0.85],"7":[613.4,934.4,0,-1,1,0.85],"15":[183.4,487.2,180,1,-1,0.85],"19":[269.4,990.3,180,-1,-1,0.85],"32":[97.3,179.8,90,-1,1,0.85],"69":[212.0,654.9,180,1,-1,0.85],"76":[498.7,431.3,90,-1,1,0.85],"88":[670.7,151.8,90,-1,-1,0.85],"91":[670.7,738.8,90,1,1,0.85],"86":[298.0,123.8,180,1,-1,0.75],"80":[355.4,487.2,90,-1,-1,0.65],"0":[68.7,599.0,90,-1,1,0.85],"71":[470.1,1046.2,270,-1,-1,0.85],"1":[212.0,571.0,0,-1,1,0.85],"53":[527.4,682.9,180,1,1,0.85]}};
+function layout(v){
+ const r=rng(v*977),M=768,Hh=1086;
+ let D=V1.map(([id,d,cx,cy,w,h,a,f,bar])=>({id,d,cx,cy,ox:cx,oy:cy,w,h,a,bar,ring:f==2,ac:f==1,sx:1,sy:1,rot:0,k:1}));
+ const mx=s=>{s.sx=-1;s.cx=M-s.cx},fy=s=>{s.sy=-1;s.cy=Hh-s.cy};
+ if(v==2)D=V2X.map(([id,d,cx,cy,w,hh,a,f,bar])=>({id,d,cx,cy,ox:cx,oy:cy,w,h:hh,a,bar,ring:false,ac:false,sx:1,sy:1,rot:0,k:1}));
+ if(v>=3)D=D.filter(s=>s.a>=3000);
+ if(v==3)D.forEach(fy);
+ if(v>=4){
+  if(v==6){const g=D.find(s=>s.ring);D.push({...g,id:900})}
+  const P=PACK[v];D=D.filter(s=>P[s.id]);
+  D.forEach(s=>{const[cx,cy,rot,sx,sy,k]=P[s.id];Object.assign(s,{cx,cy,rot,sx,sy,k})})}
 
-  const canvas = document.getElementById('canvas-container');
-  const elementsContainer = document.getElementById('canvas-elements');
+ D.push(...S.added.map(s=>({...s})));
+ return D}
+const col=s=>S.over[s.id]?.color||S.fg;
+function shapeEl(s){
+ const o=S.over[s.id]||{},k=S.g*(s.k||1)*(o.s||1),c=col(s),out=o.out,pf=S.pat!='none'&&!out?`url(#pt-${S.pat}-${c.slice(1)})`:'';
+ const tf=`translate(${s.cx+(o.dx||0)} ${s.cy+(o.dy||0)}) rotate(${(s.rot||0)+(o.rot||0)}) scale(${s.sx*k} ${s.sy*k}) translate(${-s.ox} ${-s.oy})`;
+ return `<path data-s="${s.id}" d="${s.d}" transform="${tf}" fill-rule="evenodd" fill="${out?'none':pf||c}" stroke="${out||pf?c:'none'}" stroke-width="${out?(o.ow||3)/((W/768)*k):pf?2/((W/768)*k):0}" stroke-linejoin="miter" data-ox="${s.ox}" data-oy="${s.oy}"/>`}
+function textEl(x){
+ const sz=x.fs||SC[x.sz],c=x.col||S.fg,fill=c,lh=(x.lh||1.05)*sz;
+ const st=`font-family:${(FONTS[x.f]||`'${x.f}'`).replace(/"/g,"'")};`;
+ const ls=x.t.split('\n'),tl=x.tl&&x.tl.length==ls.length&&x.w==500&&!x.b&&!x.i?x.tl:null;
+ const sp=ls.map((l,i)=>`<tspan x="${x.x}" dy="${i?lh:0}"${tl?` textLength="${tl[i]}" lengthAdjust="spacingAndGlyphs"`:''}>${l.replace(/&/g,'&amp;').replace(/</g,'&lt;')||' '}</tspan>`).join('');
+ return `<text data-t="${x.id}" x="${x.x}" y="${x.y}" font-size="${sz}" font-weight="${x.b?Math.max(x.w,700):x.w}" font-style="${x.i?'italic':'normal'}" text-decoration="${x.u?'underline':'none'}" letter-spacing="${tl?0:(x.tr||0)*sz}" fill="${x.ol?'none':fill}" stroke="${x.ol?c:'none'}" stroke-width="${x.ol?1.5:0}" opacity="${x.op}" style="${st}">${sp}</text>`}
+function defs(){
+ const bg=S.bg,h=v=>[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)/255);
+ const d=h(DUO),l=h(S.bg);
+ return `<defs>
+ <filter id="fGr" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 1.6 0 0 0 -.3"/></filter>
+ <filter id="fPa" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".012 .03" numOctaves="4" seed="8"/><feColorMatrix values="0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .22 0 0 0 1.4 -.45"/></filter>
+ <filter id="fDu" color-interpolation-filters="sRGB"><feColorMatrix values=".33 .59 .11 0 0 .33 .59 .11 0 0 .33 .59 .11 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="table" tableValues="${d[0]} ${l[0]}"/><feFuncG type="table" tableValues="${d[1]} ${l[1]}"/><feFuncB type="table" tableValues="${d[2]} ${l[2]}"/></feComponentTransfer></filter>
+ <pattern id="pHt" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="5" cy="5" r="3.2" fill="${bg}"/></pattern></defs>`}
+function patDefs(L){
+ if(S.pat=='none')return'';const p=S.patSize,cs=[...new Set(L.map(col))];
+ const body={stripes:c=>`<pattern id="pt-stripes-${c.slice(1)}" width="${p}" height="${p}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${p}" height="${p/2}" fill="${c}"/></pattern>`,
+  dots:c=>`<pattern id="pt-dots-${c.slice(1)}" width="${p}" height="${p}" patternUnits="userSpaceOnUse"><circle cx="${p/2}" cy="${p/2}" r="${p*.28}" fill="${c}"/></pattern>`,
+  grid:c=>`<pattern id="pt-grid-${c.slice(1)}" width="${p}" height="${p}" patternUnits="userSpaceOnUse"><rect width="${p}" height="${p*.2}" fill="${c}"/><rect width="${p*.2}" height="${p}" fill="${c}"/></pattern>`,
+  checks:c=>`<pattern id="pt-checks-${c.slice(1)}" width="${p*2}" height="${p*2}" patternUnits="userSpaceOnUse"><rect width="${p}" height="${p}" fill="${c}"/><rect x="${p}" y="${p}" width="${p}" height="${p}" fill="${c}"/></pattern>`}[S.pat];
+ return `<defs>${cs.map(body).join('')}</defs>`}
+function overlay(){
+ const a=S.str,R=`<rect width="${W}" height="${H}"`;
+ if(S.fx=='grain')return `${R} filter="url(#fGr)" opacity="${a}" style="mix-blend-mode:multiply;pointer-events:none"/>`;
+ if(S.fx=='paper')return `${R} filter="url(#fPa)" opacity="${a}" style="mix-blend-mode:multiply;pointer-events:none"/>${R} fill="#e8dcc0" opacity="${a*.35}" style="mix-blend-mode:multiply;pointer-events:none"/>`;
+ if(S.fx=='half')return `${R} fill="url(#pHt)" opacity="${a}" style="pointer-events:none"/>`;return ''}
+function gridEl(){if(!S.grid)return'';const x0=64,cw=(W-128)/12,y0=90,rh=(H-180)/18;let s='<g stroke="#D62828" stroke-width="1" opacity=".55" pointer-events="none" data-ui="1">';
+ for(let i=0;i<=12;i++)s+=`<line x1="${x0+i*cw}" y1="0" x2="${x0+i*cw}" y2="${H}"/>`;for(let j=0;j<=18;j++)s+=`<line x1="0" y1="${y0+j*rh}" x2="${W}" y2="${y0+j*rh}"/>`;return s+'</g>'}
+const DASH='fill="none" stroke="#D62828" stroke-width="2" stroke-dasharray="8 6" vector-effect="non-scaling-stroke" pointer-events="none"';
+function render(){
+ const L=layout(S.ver).filter(s=>!S.del[s.id]);
+ svg.innerHTML=defs()+patDefs(L)+`<rect width="${W}" height="${H}" fill="${S.bg}"/><g id="art"${S.fx=='duo'?` filter="url(#fDu)"`:''}><g transform="scale(${W/768})">${L.map(shapeEl).join('')}</g>${S.texts.filter(t=>S.ver==1||!t.base).map(textEl).join('')}</g>${overlay()}${gridEl()}`;
+ const ns=svg.namespaceURI;
+ svg.querySelectorAll('text').forEach(el=>{const x=S.texts.find(t=>t.id==el.dataset.t);if(!x.hl)return;const b=el.getBBox(),r=document.createElementNS(ns,'rect');
+  [['x',b.x-10],['y',b.y-4],['width',b.width+20],['height',b.height+8],['fill',x.hlc||'#FFE14D'],['opacity',x.op]].forEach(([k,v])=>r.setAttribute(k,v));el.before(r)});
+ if(S.sel!=null){const el=svg.querySelector(`[data-s="${S.sel}"]`);if(el){
+  const b=el.getBBox(),M=svg.getScreenCTM().inverse().multiply(el.getScreenCTM()),P=(x,y)=>{const t=svg.createSVGPoint();t.x=x;t.y=y;return t.matrixTransform(M)},pd=4;
+  const c=[P(b.x-pd,b.y-pd),P(b.x+b.width+pd,b.y-pd),P(b.x+b.width+pd,b.y+b.height+pd),P(b.x-pd,b.y+b.height+pd)],u=1/(view.z*640/1066);
+  const pv=P(+el.dataset.ox,+el.dataset.oy),ctr={x:(c[0].x+c[2].x)/2,y:(c[0].y+c[2].y)/2},tm={x:(c[0].x+c[1].x)/2,y:(c[0].y+c[1].y)/2};
+  let dx=tm.x-ctr.x,dy=tm.y-ctr.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const rh={x:tm.x+dx*32*u,y:tm.y+dy*32*u};
+  const ui=document.createElementNS(ns,'g');ui.setAttribute('data-ui',1);
+  const pr=svg.createSVGPoint();
+  ui.innerHTML=`<polygon points="${c.map(q=>q.x+','+q.y).join(' ')}" ${DASH}/><line x1="${tm.x}" y1="${tm.y}" x2="${rh.x}" y2="${rh.y}" stroke="#D62828" stroke-width="1.5" vector-effect="non-scaling-stroke" pointer-events="none"/>
+   <circle data-h="rot" data-cx="${pv.x}" data-cy="${pv.y}" cx="${rh.x}" cy="${rh.y}" r="${9*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:grab"><title>Rotate (hold Shift to snap to 15°)</title></circle>
+   <rect data-h="size" data-cx="${pv.x}" data-cy="${pv.y}" x="${c[2].x-8*u}" y="${c[2].y-8*u}" width="${16*u}" height="${16*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:nwse-resize"><title>Resize</title></rect>`;
+  svg.appendChild(ui);
+  const xs=c.map(q=>q.x),ys=c.map(q=>q.y),q={x:Math.min(Math.max(...xs)+4*u,W-14*u-2),y:Math.max(Math.min(...ys)-4*u,14*u+2)};
+  const hd=document.createElementNS(ns,'g');hd.setAttribute('data-ui',1);hd.setAttribute('data-del',1);hd.setAttribute('style','cursor:pointer');
+  hd.innerHTML=`<title>Remove shape</title><circle cx="${q.x}" cy="${q.y}" r="${13*u}" fill="#D62828"/><path d="M${q.x-5*u} ${q.y-5*u}l${10*u} ${10*u}m0 ${-10*u}l${-10*u} ${10*u}" stroke="#fff" stroke-width="${2.5*u}" stroke-linecap="round"/>`;svg.appendChild(hd)}}
+ if(S.selT!=null){const el=svg.querySelector(`[data-t="${S.selT}"]`);if(el){const b=el.getBBox(),r=document.createElementNS(ns,'rect');
+  [['x',b.x-6],['y',b.y-6],['width',b.width+12],['height',b.height+12],['data-ui',1]].forEach(([k,v])=>r.setAttribute(k,v));r.setAttribute('style','fill:none;stroke:#D62828;stroke-width:2;stroke-dasharray:8 6;pointer-events:none');svg.appendChild(r)}}}
 
-  // CANVAS RESIZING
-  function resizeCanvas() {
-    const parent = canvas.parentElement;
-    const padding = 60;
-    const availWidth = parent.clientWidth - padding;
-    const availHeight = parent.clientHeight - padding;
-    
-    let height = availHeight;
-    let width = height / 1.414;
+/* ---------- UI wiring ---------- */
+document.querySelectorAll('.hd').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+$('vers').innerHTML=[1,2,3,4,5,6].map(v=>`<button class="b" data-v="${v}">Template ${v}</button>`).join('');
+$('vers').onclick=e=>{const v=e.target.dataset.v;if(v){S.ver=+v;S.sel=null;if(S.ver!=1&&T()?.base)S.selT=null;sync();render()}};
+$('cBg').oninput=e=>{S.bg=e.target.value;render()};
+$('cBgR').onclick=()=>{S.bg='#F4F4F1';$('cBg').value=S.bg;render()};
+$('cFg').oninput=e=>{S.fg=e.target.value;Object.values(S.over).forEach(o=>delete o.color);render();sync()};
+$('cFgR').onclick=()=>{S.fg='#000000';$('cFg').value=S.fg;Object.values(S.over).forEach(o=>delete o.color);render();sync()};
+$('gScale').oninput=e=>{S.g=+e.target.value;$('gSv').textContent=Math.round(S.g*100)+'%';render()};
+$('showGrid').onchange=e=>{S.grid=e.target.checked;render()};$('snap').onchange=e=>S.snap=e.target.checked;
+$('fxs').innerHTML=Object.entries(FX).map(([k,n])=>`<button class="b" data-f="${k}">${n}</button>`).join('');
+$('fxs').onclick=e=>{const f=e.target.dataset.f;if(f){S.fx=f;sync();render()}};
+$('pts').innerHTML=Object.entries(PATS).map(([k,n])=>`<button class="b" data-pt="${k}">${n}</button>`).join('');
+$('pts').onclick=e=>{const k=e.target.dataset.pt;if(k){S.pat=k;sync();render()}};
+$('pSize').oninput=e=>{S.patSize=+e.target.value;$('pSv').textContent=S.patSize+' px';render()};
+$('fStr').oninput=e=>{S.str=+e.target.value;render()};
+$('tFont').innerHTML=Object.keys(FONTS).map(f=>`<option value="${f}" style="font-family:${FONTS[f].replace(/"/g,'&quot;')}">${f}</option>`).join('');
 
-    if (width > availWidth) {
-      width = availWidth;
-      height = width * 1.414;
-    }
+const ov=()=>S.over[S.sel]||(S.over[S.sel]={});
+function mkShape(t){
+ const X=384,Y=543,f=n=>+n.toFixed(1),id=++aid;let d,w,hh;
+ const disc=(cx,cy,r)=>`M${cx-r} ${cy}A${r} ${r} 0 1 0 ${cx+r} ${cy}A${r} ${r} 0 1 0 ${cx-r} ${cy}Z`;
+ if(t=='bv'){w=35;hh=260;d=`M${X-w/2} ${Y-hh/2}h${w}v${hh}h${-w}Z`}
+ else if(t=='bh'){w=260;hh=35;d=`M${X-w/2} ${Y-hh/2}h${w}v${hh}h${-w}Z`}
+ else if(t=='circle'){w=hh=150;d=disc(X,Y,75)}
+ else if(t=='ring'){w=hh=170;d=disc(X,Y,85)+disc(X,Y,55)}
+ else if(t=='semi'){w=170;hh=85;const y=Y+hh/2;d=`M${X-85} ${y}A85 85 0 0 1 ${X+85} ${y}Z`}
+ else if(t=='arc'){w=230;hh=115;const y=Y+hh/2;d=`M${X-115} ${y}A115 115 0 0 1 ${X+115} ${y}L${X+80} ${y}A80 80 0 0 0 ${X-80} ${y}Z`}
+ else{w=hh=120;const x0=X-60,y0=Y+60;d=`M${x0} ${y0}h120A120 120 0 0 0 ${x0} ${y0-120}Z`}
+ const n=S.added.length%6*18;
+ return{id,d,cx:X+n,cy:Y+n,ox:X,oy:Y,w,h:hh,a:99999,bar:0,ring:t=='ring',ac:false,sx:1,sy:1,rot:0,k:1}}
+$('aType').onchange=e=>{const v=e.target.value;if(!v)return;const s=mkShape(v);s.ox=384;s.oy=543;S.added.push(s);S.sel=s.id;S.selT=null;e.target.value='';sync();render()};
+$('sColor').oninput=e=>{ov().color=e.target.value;render()};
+$('sReset').onclick=()=>{delete ov().color;sync();render()};
+$('sOut').onchange=e=>{ov().out=e.target.checked;sync();render()};
+$('sOw').oninput=e=>{ov().ow=+e.target.value;$('owV').textContent=e.target.value+' px';render()};
+$('sScale').oninput=e=>{ov().s=+e.target.value;$('sSv').textContent=Math.round(ov().s*100)+'%';render()};
+$('sRot').oninput=e=>{ov().rot=+e.target.value;render()};
+function delShape(){if(S.sel==null)return;S.del[S.sel]=1;S.sel=null;sync();render()}
+addEventListener('keydown',e=>{if(e.key!='Delete'&&e.key!='Backspace')return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.type!='color'&&a.type!='range'&&a.type!='checkbox')return;
+ if(S.sel!=null){e.preventDefault();delShape()}else if(S.selT!=null){e.preventDefault();$('tDel').click()}});
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-  }
-  window.addEventListener('resize', resizeCanvas);
+const T=()=>S.texts.find(t=>t.id==S.selT);
+const tb=(id,k)=>$(id).onclick=()=>{const t=T();if(t){t[k]=!t[k];sync();render()}};
+tb('tB','b');tb('tI','i');tb('tU','u');tb('tOl','ol');tb('tHl','hl');
+$('tTxt').oninput=e=>{T().t=e.target.value;delete T().tl;render()};
+$('tFont').onchange=e=>{T().f=e.target.value;delete T().tl;render()};
+$('tSize').oninput=e=>{const t=T();t.sz=+e.target.value;delete t.fs;delete t.tl;sync();render()};
+$('tOp').oninput=e=>{T().op=+e.target.value;render()};
+$('tCol').oninput=e=>{T().col=e.target.value;render()};
+$('tHlc').oninput=e=>{const t=T();t.hlc=e.target.value;t.hl=true;sync();render()};
+$('tAdd').onclick=()=>{const t={id:++tid,t:'New text',x:180,y:543,sz:6,f:'Inter',w:500,col:null,op:1};S.texts.push(t);S.selT=t.id;sync();render()};
+$('tDel').onclick=()=>{S.texts=S.texts.filter(t=>t.id!=S.selT);S.selT=null;sync();render()};
+$('tUp').onchange=async e=>{const f=e.target.files[0];if(!f||!T())return;const n='Custom'+(++tid);
+ const buf=await f.arrayBuffer(),ff=new FontFace(n,buf);await ff.load();document.fonts.add(ff);FONTS[n]=`'${n}',sans-serif`;CUSTOM[n]=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(new Blob([buf]))});
+ const o=document.createElement('option');o.value=n;o.textContent=f.name.replace(/\.\w+$/,'');$('tFont').appendChild(o);T().f=n;sync();render()};
 
-  function pushHistory() {
-    historyStep++;
-    history.splice(historyStep);
-    history.push(JSON.stringify(state));
-  }
+function sync(){
+ document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',+b.dataset.v==S.ver));
+ document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f==S.fx));
+ $('fSv').textContent=Math.round(S.str*100)+'%';document.querySelectorAll('[data-pt]').forEach(b=>b.classList.toggle('on',b.dataset.pt==S.pat));$('pSize').value=S.patSize;$('pSv').textContent=S.patSize+' px';
+ const has=S.sel!=null;$('selUI').hidden=!has;$('noSel').hidden=has;
+ if(has){const o=S.over[S.sel]||{},s=layout(S.ver).find(x=>x.id==S.sel);
+  $('sColor').value=o.color||(s?col(s):'#000000');$('sOut').checked=!!o.out;$('owWrap').hidden=!o.out;$('sOw').value=o.ow||3;$('owV').textContent=(o.ow||3)+' px';$('sScale').value=o.s||1;$('sSv').textContent=Math.round((o.s||1)*100)+'%';$('sRot').value=o.rot||0}
+ const t=T();$('tUI').hidden=!t;$('tDel').disabled=!t;$('tNote').hidden=!!t;
+ if(t){if(document.activeElement!=$('tTxt'))$('tTxt').value=t.t;$('tFont').value=t.f;$('tSize').value=t.sz;$('tSv').textContent=(t.fs?Math.round(t.fs):SC[t.sz])+' pt';$('tOp').value=t.op;$('tCol').value=t.col||S.fg;$('tHlc').value=t.hlc||'#FFE14D';
+  [['tB','b'],['tI','i'],['tU','u'],['tOl','ol'],['tHl','hl']].forEach(([i,k])=>$(i).classList.toggle('on',!!t[k]))}}
 
-  function undo() {
-    if (historyStep > 0) {
-      historyStep--;
-      state = JSON.parse(history[historyStep]);
-      render();
-    }
-  }
-
-  function redo() {
-    if (historyStep < history.length - 1) {
-      historyStep++;
-      state = JSON.parse(history[historyStep]);
-      render();
-    }
-  }
-
-  // ELEMENT MANAGEMENT
-  function generateId() { return 'el_' + Math.random().toString(36).substr(2, 9); }
-
-  function addText(defaults = {}) {
-    const el = {
-      id: generateId(),
-      type: 'text',
-      text: defaults.text || 'prague\nschool\nof\ndesign',
-      x: defaults.x || 10,
-      y: defaults.y || 10,
-      fontSize: defaults.fontSize || 37,
-      fontFamily: defaults.fontFamily || 'Helvetica, Arial, sans-serif',
-      fontWeight: defaults.fontWeight || 'bold',
-      fontStyle: 'normal',
-      textDecoration: 'none',
-      color: defaults.color || '#000000',
-      rotation: defaults.rotation || 0,
-      opacity: 1
-    };
-    state.elements.push(el);
-    state.selectedId = el.id;
-    pushHistory();
-    render();
-  }
-
-  function addShape(shapeType, defaults = {}) {
-    const el = {
-      id: generateId(),
-      type: 'shape',
-      shapeType: shapeType,
-      x: defaults.x || 20,
-      y: defaults.y || 20,
-      width: defaults.width || 30,
-      height: defaults.height || 30,
-      fill: defaults.fill || '#000000',
-      stroke: defaults.stroke || 'transparent',
-      strokeWidth: defaults.strokeWidth || 0,
-      rotation: defaults.rotation || 0,
-      opacity: defaults.opacity || 1
-    };
-    state.elements.push(el);
-    state.selectedId = el.id;
-    pushHistory();
-    render();
-  }
-
-  function selectElement(id) {
-    state.selectedId = id;
-    render();
-  }
-
-  // RENDER ENGINE
-  function render() {
-    canvas.style.backgroundColor = state.bgColor;
-    document.getElementById('bg-color-picker').value = state.bgColor;
-    elementsContainer.innerHTML = '';
-
-    state.elements.forEach(el => {
-      const node = document.createElement('div');
-      node.className = `poster-element ${el.id === state.selectedId ? 'selected' : ''}`;
-      node.style.left = `${el.x}%`;
-      node.style.top = `${el.y}%`;
-      node.style.transform = `rotate(${el.rotation || 0}deg)`;
-      node.style.opacity = el.opacity;
-
-      if (el.type === 'text') {
-        node.className += ' poster-text';
-        node.innerText = el.text;
-        node.style.fontSize = `${(el.fontSize / 800) * canvas.clientWidth}px`;
-        node.style.fontFamily = el.fontFamily;
-        node.style.fontWeight = el.fontWeight;
-        node.style.fontStyle = el.fontStyle;
-        node.style.textDecoration = el.textDecoration;
-        node.style.color = el.color;
-      } else if (el.type === 'shape') {
-        node.style.width = `${el.width}%`;
-        node.style.height = `${el.height}%`;
-
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-
-        if (el.shapeType === 'rectangle') {
-          const rect = document.createElementNS(svgNS, "rect");
-          rect.setAttribute("width", "100%");
-          rect.setAttribute("height", "100%");
-          rect.setAttribute("fill", el.fill);
-          rect.setAttribute("stroke", el.stroke);
-          rect.setAttribute("stroke-width", el.strokeWidth);
-          svg.appendChild(rect);
-        } else if (el.shapeType === 'circle') {
-          const circle = document.createElementNS(svgNS, "ellipse");
-          circle.setAttribute("cx", "50%");
-          circle.setAttribute("cy", "50%");
-          circle.setAttribute("rx", "48%");
-          circle.setAttribute("ry", "48%");
-          circle.setAttribute("fill", el.fill);
-          circle.setAttribute("stroke", el.stroke);
-          circle.setAttribute("stroke-width", el.strokeWidth);
-          svg.appendChild(circle);
-        } else if (el.shapeType === 'semicircle') {
-          const path = document.createElementNS(svgNS, "path");
-          path.setAttribute("d", "M 0,100 A 100,100 0 0,1 200,100 Z");
-          path.setAttribute("viewBox", "0 0 200 100");
-          svg.setAttribute("viewBox", "0 0 200 100");
-          path.setAttribute("fill", el.fill);
-          path.setAttribute("stroke", el.stroke);
-          path.setAttribute("stroke-width", el.strokeWidth);
-          svg.appendChild(path);
-        } else if (el.shapeType === 'line') {
-          const line = document.createElementNS(svgNS, "line");
-          line.setAttribute("x1", "0");
-          line.setAttribute("y1", "50%");
-          line.setAttribute("x2", "100%");
-          line.setAttribute("y2", "50%");
-          line.setAttribute("stroke", el.fill !== 'transparent' ? el.fill : el.stroke);
-          line.setAttribute("stroke-width", el.strokeWidth || 4);
-          svg.appendChild(line);
-        }
-        node.appendChild(svg);
-      }
-
-      // DRAG & DROP INTERACTION
-      node.addEventListener('mousedown', e => {
-        e.stopPropagation();
-        selectElement(el.id);
-        let startX = e.clientX;
-        let startY = e.clientY;
-
-        function onMouseMove(me) {
-          const dx = ((me.clientX - startX) / canvas.clientWidth) * 100;
-          const dy = ((me.clientY - startY) / canvas.clientHeight) * 100;
-          el.x += dx;
-          el.y += dy;
-          startX = me.clientX;
-          startY = me.clientY;
-          render();
-        }
-
-        function onMouseUp() {
-          window.removeEventListener('mousemove', onMouseMove);
-          window.removeEventListener('mouseup', onMouseUp);
-          pushHistory();
-        }
-
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-      });
-
-      elementsContainer.appendChild(node);
-    });
-
-    updateControlPanels();
-    renderPalette();
-    renderLayers();
-  }
-
-  // CONTROL PANEL UPDATES
-  function updateControlPanels() {
-    const sel = state.elements.find(e => e.id === state.selectedId);
-    const textCtrl = document.getElementById('text-controls');
-    const shapeCtrl = document.getElementById('shape-controls');
-
-    if (!sel) {
-      textCtrl.style.display = 'none';
-      shapeCtrl.style.display = 'none';
-      return;
-    }
-
-    if (sel.type === 'text') {
-      textCtrl.style.display = 'block';
-      shapeCtrl.style.display = 'none';
-      document.getElementById('text-val').value = sel.text;
-      document.getElementById('text-size').value = sel.fontSize;
-      document.getElementById('text-size-val').value = sel.fontSize + 'px';
-      document.getElementById('text-color').value = sel.color;
-    } else if (sel.type === 'shape') {
-      textCtrl.style.display = 'none';
-      shapeCtrl.style.display = 'block';
-      document.getElementById('shape-fill').value = sel.fill;
-      document.getElementById('shape-stroke').value = sel.stroke;
-      document.getElementById('shape-rotation').value = sel.rotation || 0;
-      document.getElementById('rotation-val').innerText = (sel.rotation || 0) + '°';
-      document.getElementById('shape-opacity').value = sel.opacity;
-    }
-  }
-
-  function updateSelectedText(prop, val) {
-    const sel = state.elements.find(e => e.id === state.selectedId);
-    if (sel && sel.type === 'text') {
-      if (prop === 'fontSize') val = parseInt(val);
-      sel[prop] = val;
-      render();
-    }
-  }
-
-  function updateSelectedShape(prop, val) {
-    const sel = state.elements.find(e => e.id === state.selectedId);
-    if (sel && sel.type === 'shape') {
-      sel[prop] = val;
-      render();
-    }
-  }
-
-  function toggleStyle(prop, val1, val2) {
-    const sel = state.elements.find(e => e.id === state.selectedId);
-    if (sel && sel.type === 'text') {
-      sel[prop] = sel[prop] === val1 ? val2 : val1;
-      render();
-    }
-  }
-
-  // FONT UPLOADER
-  function uploadFont(evt) {
-    const file = evt.target.files[0];
-    if (!file) return;
-    const fontName = file.name.split('.')[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const newFont = new FontFace(fontName, e.target.result);
-      newFont.load().then(loadedFont => {
-        document.fonts.add(loadedFont);
-        const select = document.getElementById('text-font');
-        const opt = document.createElement('option');
-        opt.value = fontName;
-        opt.innerText = fontName + ' (Custom)';
-        select.appendChild(opt);
-        select.value = fontName;
-        updateSelectedText('fontFamily', fontName);
-      });
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  // PALETTE SYSTEM
-  function setCanvasBackground(color) {
-    state.bgColor = color;
-    pushHistory();
-    render();
-  }
-
-  function renderPalette() {
-    const container = document.getElementById('palette-swatches');
-    container.innerHTML = '';
-    state.palette.forEach(color => {
-      const sw = document.createElement('div');
-      sw.className = 'swatch';
-      sw.style.backgroundColor = color;
-      sw.onclick = () => {
-        const sel = state.elements.find(e => e.id === state.selectedId);
-        if (sel) {
-          if (sel.type === 'text') sel.color = color;
-          if (sel.type === 'shape') sel.fill = color;
-          pushHistory();
-          render();
-        }
-      };
-      container.appendChild(sw);
-    });
-  }
-
-  function addPaletteColor() {
-    const col = document.getElementById('new-color-val').value;
-    if (!state.palette.includes(col)) {
-      state.palette.push(col);
-      renderPalette();
-    }
-  }
-
-  // LAYERS
-  function renderLayers() {
-    const list = document.getElementById('layer-list');
-    list.innerHTML = '';
-    [...state.elements].reverse().forEach(el => {
-      const item = document.createElement('div');
-      item.className = `layer-item ${el.id === state.selectedId ? 'selected' : ''}`;
-      item.innerText = el.type === 'text' ? `Text: ${el.text.substring(0, 12)}...` : `Shape: ${el.shapeType}`;
-      item.onclick = () => selectElement(el.id);
-      list.appendChild(item);
-    });
-  }
-
-  function moveLayer(dir) {
-    const idx = state.elements.findIndex(e => e.id === state.selectedId);
-    if (idx < 0) return;
-    if (dir === 'up' && idx < state.elements.length - 1) {
-      const el = state.elements.splice(idx, 1)[0];
-      state.elements.splice(idx + 1, 0, el);
-    } else if (dir === 'down' && idx > 0) {
-      const el = state.elements.splice(idx, 1)[0];
-      state.elements.splice(idx - 1, 0, el);
-    }
-    pushHistory();
-    render();
-  }
-
-  function deleteSelected() {
-    state.elements = state.elements.filter(e => e.id !== state.selectedId);
-    state.selectedId = null;
-    pushHistory();
-    render();
-  }
-
-  function toggleGrid() {
-    const grid = document.getElementById('grid-overlay');
-    grid.style.display = grid.style.display === 'none' ? 'grid' : 'none';
-  }
-
-  function switchTab(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.addClass ? document.getElementById(`tab-${tabName}`).classList.addClass('active') : document.getElementById(`tab-${tabName}`).className += ' active';
-  }
-
-  // PRESET GEOMETRIC TEMPLATES
-  function loadTemplate(name) {
-    state.elements = [];
-    if (name === 'swiss_modernist') {
-      state.bgColor = '#F4F4F1';
-      // Modular Semicircles, Vertical Bars & Deconstructed Type (Matching Image Style)
-      addShape('rectangle', { x: 4, y: 3, width: 4, height: 92, fill: '#000000' });
-      addShape('rectangle', { x: 92, y: 3, width: 4, height: 92, fill: '#000000' });
-      addShape('semicircle', { x: 15, y: 4, width: 32, height: 16, fill: '#000000', rotation: 180 });
-      addShape('semicircle', { x: 22, y: 22, width: 28, height: 14, fill: '#000000', rotation: 0 });
-      addShape('circle', { x: 45, y: 38, width: 26, height: 18, fill: 'transparent', stroke: '#000000', strokeWidth: 12 });
-      addText({ text: '19—25.06.15', x: 12, y: 41, fontSize: 49 });
-      addText({ text: 'prague\nschool\nof\ndesign', x: 72, y: 80, fontSize: 87 });
-      addShape('semicircle', { x: 12, y: 70, width: 28, height: 14, fill: '#000000', rotation: 0 });
-      addShape('semicircle', { x: 12, y: 80, width: 28, height: 14, fill: '#000000', rotation: 0 });
-    } else if (name === 'bauhaus') {
-      state.bgColor = '#EAE6DF';
-      addShape('circle', { x: 20, y: 15, width: 40, height: 28, fill: '#D62828' });
-      addShape('rectangle', { x: 15, y: 50, width: 65, height: 8, fill: '#000000' });
-      addText({ text: 'BAUHAUS\n1919-1928', x: 18, y: 62, fontSize: 116, color: '#000000' });
-      addShape('line', { x: 15, y: 80, width: 70, strokeWidth: 8, fill: '#1D4ED8' });
-    } else if (name === 'constructivist') {
-      state.bgColor = '#111111';
-      addShape('rectangle', { x: 10, y: 10, width: 80, height: 80, fill: '#D62828', rotation: 15 });
-      addText({ text: 'BEAT THE WHITES\nWITH THE RED WEDGE', x: 15, y: 40, fontSize: 87, color: '#F4F4F1' });
-    } else if (name === 'minimal_geometric') {
-      state.bgColor = '#FFFFFF';
-      addShape('circle', { x: 35, y: 30, width: 30, height: 21, fill: '#EA580C' });
-      addText({ text: 'LESS IS MORE', x: 35, y: 65, fontSize: 37, color: '#000000' });
-    } else if (name === 'editorial') {
-      state.bgColor = '#F0F0F0';
-      addText({ text: 'ARCHITECTURAL\nSYSTEMS', x: 8, y: 10, fontSize: 155, color: '#000000' });
-      addShape('line', { x: 8, y: 32, width: 84, strokeWidth: 2, fill: '#000000' });
-    } else if (name === 'experimental') {
-      state.bgColor = '#0A0A0A';
-      addShape('semicircle', { x: 5, y: 5, width: 60, height: 30, fill: '#F4F4F1', rotation: 45 });
-      addText({ text: 'DECONSTRUCT', x: 10, y: 50, fontSize: 207, color: '#D62828' });
-    }
-    pushHistory();
-    render();
-  }
-
-  // EXPORT SYSTEM
-  function exportPoster(format) {
-    const node = document.getElementById('canvas-container');
-    if (format === 'svg') {
-      let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1131" viewBox="0 0 100 141" style="background:${state.bgColor}">`;
-      state.elements.forEach(el => {
-        if (el.type === 'shape') {
-          if (el.shapeType === 'rectangle') {
-            svgContent += `<rect x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}" fill="${el.fill}" transform="rotate(${el.rotation || 0} ${el.x} ${el.y})"/>`;
-          } else if (el.shapeType === 'circle') {
-            svgContent += `<ellipse cx="${el.x + el.width/2}" cy="${el.y + el.height/2}" rx="${el.width/2}" ry="${el.height/2}" fill="${el.fill}"/>`;
-          }
-        } else if (el.type === 'text') {
-          svgContent += `<text x="${el.x}" y="${el.y + 5}" font-size="${el.fontSize/15}" font-family="${el.fontFamily}" fill="${el.color}">${el.text}</text>`;
-        }
-      });
-      svgContent += `</svg>`;
-      const blob = new Blob([svgContent], {type: 'image/svg+xml'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'poster.svg';
-      a.click();
-    } else {
-      alert(`Exporting as ${format.toUpperCase()}... (For production PNG/JPG, render SVG to HTML5 Canvas blob)`);
-    }
-  }
-
-  // INIT
-  resizeCanvas();
-  loadTemplate('swiss_modernist');
-</script>
-</body>
-</html>
+/* ---------- canvas interaction ---------- */
+const vp=$('vp'),stage=$('stage');
+const toSvg=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())};
+function open(i){document.querySelectorAll('.ac')[i].classList.add('open')}
+vp.addEventListener('pointerdown',e=>{
+ if(e.target.closest('[data-del]')){delShape();return}
+ const hh=e.target.closest('[data-h]');
+ if(hh&&S.sel!=null){const o=S.over[S.sel]||(S.over[S.sel]={}),p=toSvg(e),cx=+hh.dataset.cx,cy=+hh.dataset.cy;
+  drag=hh.dataset.h=='rot'?{k:'rot',o,cx,cy,a0:Math.atan2(p.y-cy,p.x-cx),r0:o.rot||0}:{k:'size',o,cx,cy,d0:Math.hypot(p.x-cx,p.y-cy)||1,s0:o.s||1};
+  vp.setPointerCapture(e.pointerId);return}
+ const tx=e.target.closest('[data-t]'),sh=e.target.closest('[data-s]');
+ if(tx){const t=S.texts.find(x=>x.id==tx.dataset.t),p=toSvg(e);S.selT=t.id;S.sel=null;drag={k:'t',t,dx:p.x-t.x,dy:p.y-t.y};open(4);sync();render()}
+ else if(sh){const id=+sh.dataset.s,o=S.over[id]||(S.over[id]={}),p=toSvg(e);S.sel=id;S.selT=null;drag={k:'s',o,px:p.x,py:p.y,dx:o.dx||0,dy:o.dy||0};open(1);sync();render()}
+ else{S.sel=null;S.selT=null;drag={k:'p',x:e.clientX-view.x,y:e.clientY-view.y};vp.classList.add('pan');sync();render()}
+ vp.setPointerCapture(e.pointerId)});
+vp.addEventListener('pointermove',e=>{if(!drag)return;
+ if(drag.k=='p'){view.x=e.clientX-drag.x;view.y=e.clientY-drag.y;apply()}
+ else if(drag.k=='rot'){const p=toSvg(e);let r=drag.r0+(Math.atan2(p.y-drag.cy,p.x-drag.cx)-drag.a0)*180/Math.PI;if(e.shiftKey)r=Math.round(r/15)*15;drag.o.rot=((r+540)%360+360)%360-180;sync();render()}
+ else if(drag.k=='size'){const p=toSvg(e);drag.o.s=Math.min(6,Math.max(.1,drag.s0*Math.hypot(p.x-drag.cx,p.y-drag.cy)/drag.d0));sync();render()}
+ else if(drag.k=='s'){const p=toSvg(e),f=W/768;drag.o.dx=drag.dx+(p.x-drag.px)/f;drag.o.dy=drag.dy+(p.y-drag.py)/f;render()}
+ else{const p=toSvg(e);let x=p.x-drag.dx,y=p.y-drag.dy;
+  if(S.snap){const cw=(W-128)/12,rh=(H-180)/18;x=64+Math.round((x-64)/cw)*cw;y=90+Math.round((y-90)/rh)*rh}
+  drag.t.x=x;drag.t.y=y;render()}});
+const end=()=>{drag=null;vp.classList.remove('pan')};vp.addEventListener('pointerup',end);vp.addEventListener('pointercancel',end);
+function apply(){stage.style.transform=`translate(${view.x}px,${view.y}px) scale(${view.z})`}
+function zoom(f,abs){const r=vp.getBoundingClientRect(),cx=r.width/2,cy=r.height/2,z=Math.min(8,Math.max(.1,abs||view.z*f));
+ view.x=cx-(cx-view.x)*z/view.z;view.y=cy-(cy-view.y)*z/view.z;view.z=z;apply()}
+function fit(){const r=vp.getBoundingClientRect(),w=640,h=905,z=Math.min((r.width-40)/w,(r.height-100)/h);view={z,x:(r.width-w*z)/2,y:68+((r.height-100)-h*z)/2};apply()}
+$('zi').onclick=()=>zoom(1.2);$('zo').onclick=()=>zoom(1/1.2);$('zf').onclick=fit;
+$('z1').onclick=()=>{const r=vp.getBoundingClientRect();view={z:1,x:(r.width-640)/2,y:Math.max(68,68+((r.height-100)-905)/2)};apply()};
+vp.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoom(e.deltaY<0?1.1:1/1.1)}else{view.x-=e.deltaX;view.y-=e.deltaY;apply()}},{passive:false});
+addEventListener('resize',fit);
+async function fontCss(){
+ const used=[...new Set(S.texts.filter(t=>S.ver==1||!t.base).map(t=>t.f))];let css='';
+ for(const f of used){try{
+  if(CUSTOM[f]){css+=`@font-face{font-family:'${f}';src:url(${CUSTOM[f]});}`;continue}
+  const d=GF[f];if(!d)continue;
+  const t=await(await fetch(`https://fonts.googleapis.com/css2?family=${d.q}${d.w?':wght@'+d.w:''}&display=swap`)).text();
+  for(let b of t.split('/* ').slice(1).filter(b=>b.startsWith('latin */'))){
+   for(const m of [...b.matchAll(/url\((https:[^)]+)\)/g)]){const blob=await(await fetch(m[1])).blob();
+    const data=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(blob)});b=b.replace(m[1],data)}
+   css+=b}
+ }catch(e){}}
+ return css}
+async function clean(){const c=svg.cloneNode(true);c.querySelectorAll('[data-ui]').forEach(n=>n.remove());c.removeAttribute('id');c.removeAttribute('style');c.setAttribute('width',W);c.setAttribute('height',H);
+ const css=await fontCss();let s=new XMLSerializer().serializeToString(c);return css?s.replace(/<svg[^>]*>/,m=>m+`<style>${css}</style>`):s}
+const save=(blob,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+$('dSvg').onclick=async()=>save(new Blob([await clean()],{type:'image/svg+xml'}),'poster.svg');
+async function raster(scale){
+ const u=URL.createObjectURL(new Blob([await clean()],{type:'image/svg+xml'}));
+ const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});
+ const c=document.createElement('canvas');c.width=W*scale;c.height=H*scale;const x=c.getContext('2d');
+ x.fillStyle=S.bg;x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);return c}
+const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+$('dPng').onclick=async()=>save(await toBlob(await raster(2),'image/png'),'poster.png');
+function pdfFromJpeg(jpg,iw,ih){
+ const pw=595.28,ph=841.89,enc=new TextEncoder(),parts=[],off=[];let len=0;
+ const push=x=>{const b=typeof x=='string'?enc.encode(x):x;parts.push(b);len+=b.length};
+ const obj=(n,body)=>{off[n]=len;push(`${n} 0 obj\n`);body();push('\nendobj\n')};
+ push('%PDF-1.4\n');
+ obj(1,()=>push('<</Type/Catalog/Pages 2 0 R>>'));
+ obj(2,()=>push('<</Type/Pages/Kids[3 0 R]/Count 1>>'));
+ obj(3,()=>push(`<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${pw} ${ph}]/Resources<</XObject<</Im0 4 0 R>>>>/Contents 5 0 R>>`));
+ obj(4,()=>{push(`<</Type/XObject/Subtype/Image/Width ${iw}/Height ${ih}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${jpg.length}>>\nstream\n`);push(jpg);push('\nendstream')});
+ const cs=`q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`;
+ obj(5,()=>push(`<</Length ${cs.length}>>\nstream\n${cs}\nendstream`));
+ const xr=len;push('xref\n0 6\n0000000000 65535 f \n');
+ for(let n=1;n<=5;n++)push(String(off[n]).padStart(10,'0')+' 00000 n \n');
+ push(`trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n${xr}\n%%EOF\n`);
+ return new Blob(parts,{type:'application/pdf'})}
+$('dPdf').onclick=async()=>{const c=await raster(3),jpg=new Uint8Array(await(await toBlob(c,'image/jpeg',.95)).arrayBuffer());
+ save(pdfFromJpeg(jpg,c.width,c.height),'poster.pdf')};
+/* ---------- undo / redo / reset ---------- */
+const TEXTS0=JSON.stringify(S.texts),KEYS=['ver','bg','fg','g','over','del','texts','added','fx','str','pat','patSize'];
+const snap=()=>{const o={};KEYS.forEach(k=>o[k]=S[k]);o.over=Object.fromEntries(Object.entries(S.over).filter(([,v])=>Object.keys(v).length));return JSON.stringify(o)};
+let hist=[snap()],hi=0,ht=null;
+function hbtn(){$('hUndo').disabled=hi<=0;$('hRedo').disabled=hi>=hist.length-1}
+function commit(){const s=snap();if(s===hist[hi])return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>100)hist.shift();hi=hist.length-1;hbtn()}
+function later(){clearTimeout(ht);ht=setTimeout(commit,300)}
+['pointerup','change','input','click','keyup'].forEach(t=>document.addEventListener(t,later,true));
+function restore(s){Object.assign(S,JSON.parse(s));if(!S.texts.some(t=>t.id==S.selT))S.selT=null;S.sel=null;
+ $('cBg').value=S.bg;$('cFg').value=S.fg;$('gScale').value=S.g;$('gSv').textContent=Math.round(S.g*100)+'%';$('fStr').value=S.str;sync();render()}
+function undo(){clearTimeout(ht);commit();if(hi>0){hi--;restore(hist[hi]);hbtn()}}
+function redo(){clearTimeout(ht);commit();if(hi<hist.length-1){hi++;restore(hist[hi]);hbtn()}}
+function resetT(){clearTimeout(ht);commit();Object.assign(S,{bg:'#F4F4F1',fg:'#000000',g:1,over:{},del:{},added:[],texts:JSON.parse(TEXTS0),fx:'none',str:.6,pat:'none',patSize:10,sel:null,selT:null});
+ restore(snap());commit()}
+$('hUndo').onclick=undo;$('hRedo').onclick=redo;$('hReset').onclick=resetT;
+addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;
+ const k=e.key.toLowerCase();if(k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(k=='y'){e.preventDefault();redo()}});
+hbtn();
+sync();render();fit();
+</script></body></html>
