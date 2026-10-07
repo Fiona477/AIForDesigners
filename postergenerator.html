@@ -46,12 +46,14 @@ input[type=range]{width:100%;accent-color:var(--fg)}input[type=color]{width:40px
 <div class="grid6" id="vers"></div>
 <div class="chk"><input type="checkbox" id="showGrid"><span>Show grid</span></div>
 <div class="chk"><input type="checkbox" id="snap" checked><span>Snap text to grid</span></div>
-<p class="hint">Layouts keep your colors, text and effects.</p>
+<p class="hint">Each template keeps its own colors, shapes, text and effects.</p>
 </div></div></div></section>
 
 <section class="ac" id="secSel"><button class="hd">Selected shape<i>+</i></button><div class="bd"><div class="in"><div class="pad">
 <label style="margin-top:8px">Add a shape</label>
 <select id="aType" aria-label="Add a shape"><option value="">Choose a shape to add</option><option value="bv">Bar, vertical</option><option value="bh">Bar, horizontal</option><option value="circle">Circle</option><option value="ring">Ring</option><option value="semi">Semicircle</option><option value="arc">Arc</option><option value="quarter">Quarter circle</option></select>
+<label style="margin-top:14px">Add a cluster</label>
+<select id="cType" aria-label="Add a cluster"><option value="">Choose a cluster to add</option><option value="line">Line cluster</option><option value="circle">Circle cluster</option><option value="arc">Arc cluster</option><option value="mix">Mix cluster</option></select>
 <p class="hint" id="noSel">Click a shape on the poster to edit it, or drag it to move it.</p>
 <div id="selUI" hidden>
 <label>Color</label><div class="row"><input type="color" id="sColor"><button class="b" id="sReset">Use global color</button></div>
@@ -127,13 +129,13 @@ function layout(v){
   const P=PACK[v];D=D.filter(s=>P[s.id]);
   D.forEach(s=>{const[cx,cy,rot,sx,sy,k]=P[s.id];Object.assign(s,{cx,cy,rot,sx,sy,k})})}
 
- D.push(...S.added.map(s=>({...s})));
+ D.push(...S.added.filter(s=>!s.tpl||s.tpl==v).map(s=>({...s})));
  return D}
 const col=s=>S.over[s.id]?.color||S.fg;
 function shapeEl(s){
  const o=S.over[s.id]||{},k=S.g*(s.k||1)*(o.s||1),c=col(s),out=o.out,pf=S.pat!='none'&&!out?`url(#pt-${S.pat}-${c.slice(1)})`:'';
  const tf=`translate(${s.cx+(o.dx||0)} ${s.cy+(o.dy||0)}) rotate(${(s.rot||0)+(o.rot||0)}) scale(${s.sx*k} ${s.sy*k}) translate(${-s.ox} ${-s.oy})`;
- return `<path data-s="${s.id}" d="${s.d}" transform="${tf}" fill-rule="evenodd" fill="${out?'none':pf||c}" stroke="${out||pf?c:'none'}" stroke-width="${out?(o.ow||3)/((W/768)*k):pf?2/((W/768)*k):0}" stroke-linejoin="miter" data-ox="${s.ox}" data-oy="${s.oy}"/>`}
+ return `<path data-s="${s.id}" d="${s.d}" transform="${tf}" fill-rule="evenodd" fill="${out?'none':pf||c}" stroke="${out||pf?c:'none'}" stroke-width="${out?(o.ow||3)/((W/768)*k):pf?2/((W/768)*k):0}" stroke-linejoin="miter" data-ox="${s.ox}" data-oy="${s.oy}"/>${s.cluster?`<rect data-s="${s.id}" data-ui="1" x="${s.ox-s.w/2}" y="${s.oy-s.h/2}" width="${s.w}" height="${s.h}" transform="${tf}" fill="#000" fill-opacity="0" stroke="none"/>`:''}`}
 function textEl(x){
  const sz=x.fs||SC[x.sz],c=x.col||S.fg,fill=c,lh=(x.lh||1.05)*sz;
  const st=`font-family:${(FONTS[x.f]||`'${x.f}'`).replace(/"/g,"'")};`;
@@ -166,30 +168,31 @@ const DASH='fill="none" stroke="#D62828" stroke-width="2" stroke-dasharray="8 6"
 function render(){
  const L=layout(S.ver).filter(s=>!S.del[s.id]);
  svg.innerHTML=defs()+patDefs(L)+`<rect width="${W}" height="${H}" fill="${S.bg}"/><g id="art"${S.fx=='duo'?` filter="url(#fDu)"`:''}><g transform="scale(${W/768})">${L.map(shapeEl).join('')}</g>${S.texts.filter(t=>S.ver==1||!t.base).map(textEl).join('')}</g>${overlay()}${gridEl()}`;
- const ns=svg.namespaceURI;
- svg.querySelectorAll('text').forEach(el=>{const x=S.texts.find(t=>t.id==el.dataset.t);if(!x.hl)return;const b=el.getBBox(),r=document.createElementNS(ns,'rect');
-  [['x',b.x-10],['y',b.y-4],['width',b.width+20],['height',b.height+8],['fill',x.hlc||'#FFE14D'],['opacity',x.op]].forEach(([k,v])=>r.setAttribute(k,v));el.before(r)});
- if(S.sel!=null){const el=svg.querySelector(`[data-s="${S.sel}"]`);if(el){
-  const b=el.getBBox(),M=svg.getScreenCTM().inverse().multiply(el.getScreenCTM()),P=(x,y)=>{const t=svg.createSVGPoint();t.x=x;t.y=y;return t.matrixTransform(M)},pd=4;
-  const c=[P(b.x-pd,b.y-pd),P(b.x+b.width+pd,b.y-pd),P(b.x+b.width+pd,b.y+b.height+pd),P(b.x-pd,b.y+b.height+pd)],u=1/(view.z*640/1066);
-  const pv=P(+el.dataset.ox,+el.dataset.oy),ctr={x:(c[0].x+c[2].x)/2,y:(c[0].y+c[2].y)/2},tm={x:(c[0].x+c[1].x)/2,y:(c[0].y+c[1].y)/2};
-  let dx=tm.x-ctr.x,dy=tm.y-ctr.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const rh={x:tm.x+dx*32*u,y:tm.y+dy*32*u};
-  const ui=document.createElementNS(ns,'g');ui.setAttribute('data-ui',1);
-  const pr=svg.createSVGPoint();
-  ui.innerHTML=`<polygon points="${c.map(q=>q.x+','+q.y).join(' ')}" ${DASH}/><line x1="${tm.x}" y1="${tm.y}" x2="${rh.x}" y2="${rh.y}" stroke="#D62828" stroke-width="1.5" vector-effect="non-scaling-stroke" pointer-events="none"/>
-   <circle data-h="rot" data-cx="${pv.x}" data-cy="${pv.y}" cx="${rh.x}" cy="${rh.y}" r="${9*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:grab"><title>Rotate (hold Shift to snap to 15°)</title></circle>
-   <rect data-h="size" data-cx="${pv.x}" data-cy="${pv.y}" x="${c[2].x-8*u}" y="${c[2].y-8*u}" width="${16*u}" height="${16*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:nwse-resize"><title>Resize</title></rect>`;
-  svg.appendChild(ui);
-  const xs=c.map(q=>q.x),ys=c.map(q=>q.y),q={x:Math.min(Math.max(...xs)+4*u,W-14*u-2),y:Math.max(Math.min(...ys)-4*u,14*u+2)};
-  const hd=document.createElementNS(ns,'g');hd.setAttribute('data-ui',1);hd.setAttribute('data-del',1);hd.setAttribute('style','cursor:pointer');
-  hd.innerHTML=`<title>Remove shape</title><circle cx="${q.x}" cy="${q.y}" r="${13*u}" fill="#D62828"/><path d="M${q.x-5*u} ${q.y-5*u}l${10*u} ${10*u}m0 ${-10*u}l${-10*u} ${10*u}" stroke="#fff" stroke-width="${2.5*u}" stroke-linecap="round"/>`;svg.appendChild(hd)}}
- if(S.selT!=null){const el=svg.querySelector(`[data-t="${S.selT}"]`);if(el){const b=el.getBBox(),r=document.createElementNS(ns,'rect');
-  [['x',b.x-6],['y',b.y-6],['width',b.width+12],['height',b.height+12],['data-ui',1]].forEach(([k,v])=>r.setAttribute(k,v));r.setAttribute('style','fill:none;stroke:#D62828;stroke-width:2;stroke-dasharray:8 6;pointer-events:none');svg.appendChild(r)}}}
+  const ns=svg.namespaceURI;
+  svg.querySelectorAll('text').forEach(el=>{const x=S.texts.find(t=>t.id==el.dataset.t),b=el.getBBox(),tf=x.rot?`rotate(${x.rot} ${b.x+b.width/2} ${b.y+b.height/2})`:'';
+   if(tf)el.setAttribute('transform',tf);
+   if(x.hl){const r=document.createElementNS(ns,'rect');
+    [['x',b.x-10],['y',b.y-4],['width',b.width+20],['height',b.height+8],['fill',x.hlc||'#FFE14D'],['opacity',x.op]].forEach(([k,v])=>r.setAttribute(k,v));if(tf)r.setAttribute('transform',tf);el.before(r)}});
+  if(S.sel!=null){const el=svg.querySelector(`[data-s="${S.sel}"]`);if(el)drawSel(el,{x:+el.dataset.ox,y:+el.dataset.oy},4,'s')}
+  if(S.selT!=null){const el=svg.querySelector(`[data-t="${S.selT}"]`);if(el){const b=el.getBBox();drawSel(el,{x:b.x+b.width/2,y:b.y+b.height/2},6,'t')}}}
+function drawSel(el,pl,pd,kind){
+ const ns=svg.namespaceURI,b=el.getBBox(),M=svg.getScreenCTM().inverse().multiply(el.getScreenCTM()),P=(x,y)=>{const t=svg.createSVGPoint();t.x=x;t.y=y;return t.matrixTransform(M)};
+ const c=[P(b.x-pd,b.y-pd),P(b.x+b.width+pd,b.y-pd),P(b.x+b.width+pd,b.y+b.height+pd),P(b.x-pd,b.y+b.height+pd)],u=1/(view.z*640/1066);
+ const pv=P(pl.x,pl.y),ctr={x:(c[0].x+c[2].x)/2,y:(c[0].y+c[2].y)/2},tm={x:(c[0].x+c[1].x)/2,y:(c[0].y+c[1].y)/2};
+ let dx=tm.x-ctr.x,dy=tm.y-ctr.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const rh={x:tm.x+dx*32*u,y:tm.y+dy*32*u};
+ const ui=document.createElementNS(ns,'g');ui.setAttribute('data-ui',1);
+ ui.innerHTML=`<polygon points="${c.map(q=>q.x+','+q.y).join(' ')}" ${DASH}/><line x1="${tm.x}" y1="${tm.y}" x2="${rh.x}" y2="${rh.y}" stroke="#D62828" stroke-width="1.5" vector-effect="non-scaling-stroke" pointer-events="none"/>
+  <circle data-h="rot" data-k="${kind}" data-cx="${pv.x}" data-cy="${pv.y}" cx="${rh.x}" cy="${rh.y}" r="${9*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:grab"><title>Rotate (hold Shift to snap to 15°)</title></circle>
+  <rect data-h="size" data-k="${kind}" data-cx="${pv.x}" data-cy="${pv.y}" x="${c[2].x-8*u}" y="${c[2].y-8*u}" width="${16*u}" height="${16*u}" fill="#fff" stroke="#D62828" stroke-width="2" vector-effect="non-scaling-stroke" style="cursor:nwse-resize"><title>Resize</title></rect>`;
+ svg.appendChild(ui);
+ const xs=c.map(q=>q.x),ys=c.map(q=>q.y),q={x:Math.min(Math.max(...xs)+4*u,W-14*u-2),y:Math.max(Math.min(...ys)-4*u,14*u+2)};
+ const hd=document.createElementNS(ns,'g');hd.setAttribute('data-ui',1);hd.setAttribute('data-del',1);hd.setAttribute('style','cursor:pointer');
+ hd.innerHTML=`<title>Remove ${kind=='t'?'text':'shape'}</title><circle cx="${q.x}" cy="${q.y}" r="${13*u}" fill="#D62828"/><path d="M${q.x-5*u} ${q.y-5*u}l${10*u} ${10*u}m0 ${-10*u}l${-10*u} ${10*u}" stroke="#fff" stroke-width="${2.5*u}" stroke-linecap="round"/>`;svg.appendChild(hd)}
 
 /* ---------- UI wiring ---------- */
 document.querySelectorAll('.hd').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
 $('vers').innerHTML=[1,2,3,4,5,6].map(v=>`<button class="b" data-v="${v}">Template ${v}</button>`).join('');
-$('vers').onclick=e=>{const v=e.target.dataset.v;if(v){S.ver=+v;S.sel=null;if(S.ver!=1&&T()?.base)S.selT=null;sync();render()}};
+$('vers').onclick=e=>{const v=e.target.dataset.v;if(v&&+v!=S.ver)switchTo(+v)};
 $('cBg').oninput=e=>{S.bg=e.target.value;render()};
 $('cBgR').onclick=()=>{S.bg='#F4F4F1';$('cBg').value=S.bg;render()};
 $('cFg').oninput=e=>{S.fg=e.target.value;Object.values(S.over).forEach(o=>delete o.color);render();sync()};
@@ -205,6 +208,21 @@ $('fStr').oninput=e=>{S.str=+e.target.value;render()};
 $('tFont').innerHTML=Object.keys(FONTS).map(f=>`<option value="${f}" style="font-family:${FONTS[f].replace(/"/g,'&quot;')}">${f}</option>`).join('');
 
 const ov=()=>S.over[S.sel]||(S.over[S.sel]={});
+function mkCluster(type){
+ const CW=16,CH=16,COLS=8,ROWS=6,R=Math.random,f=n=>n.toFixed(1),rnd=(a,b)=>a+R()*(b-a),pick=a=>a[Math.floor(R()*a.length)];
+ const line=(cx,cy)=>{const L=rnd(8,14),T=pick([2.3,2.3,3.3]),a=pick([0,0,90,90,45,-45])*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  return 'M'+[[-L/2,-T/2],[L/2,-T/2],[L/2,T/2],[-L/2,T/2]].map(([x,y])=>f(cx+x*c-y*s)+' '+f(cy+x*s+y*c)).join('L')+'Z'};
+ const disc=(cx,cy,r)=>`M${f(cx-r)} ${f(cy)}a${f(r)} ${f(r)} 0 1 0 ${f(2*r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2*r)} 0Z`;
+ const circle=(cx,cy)=>{const k=pick(['dot','disc','ring','ring']);return k=='dot'?disc(cx,cy,rnd(1.2,2)):k=='disc'?disc(cx,cy,rnd(3,5.5)):(()=>{const r=rnd(4.5,6.5);return disc(cx,cy,r)+disc(cx,cy,r-2.4)})()};
+ const arc=(cx,cy)=>{const Ro=rnd(4.5,6.8),ri=Ro-2.6,a0=pick([0,90,180,270,45,135,225,315])*Math.PI/180,span=pick([Math.PI,Math.PI,Math.PI/2])
+  ,a1=a0+span,m=a0+span/2;cx-=Math.cos(m)*Ro*(span>2?.3:.2);cy-=Math.sin(m)*Ro*(span>2?.3:.2);
+  const P=(r,a)=>f(cx+r*Math.cos(a))+' '+f(cy+r*Math.sin(a));
+  return `M${P(Ro,a0)}A${f(Ro)} ${f(Ro)} 0 0 1 ${P(Ro,a1)}L${P(ri,a1)}A${f(ri)} ${f(ri)} 0 0 0 ${P(ri,a0)}Z`};
+ const mk={line,circle,arc};let d='';
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(R()>.82)continue;
+  const cx=384+(c+.5-COLS/2)*CW+rnd(-1,1),cy=543+(r+.5-ROWS/2)*CH+rnd(-1,1);
+  d+=mk[type=='mix'?pick(['line','circle','arc']):type](cx,cy)}
+ return{d,w:COLS*CW,h:ROWS*CH}}
 function mkShape(t){
  const X=384,Y=543,f=n=>+n.toFixed(1),id=++aid;let d,w,hh;
  const disc=(cx,cy,r)=>`M${cx-r} ${cy}A${r} ${r} 0 1 0 ${cx+r} ${cy}A${r} ${r} 0 1 0 ${cx-r} ${cy}Z`;
@@ -218,6 +236,7 @@ function mkShape(t){
  const n=S.added.length%6*18;
  return{id,d,cx:X+n,cy:Y+n,ox:X,oy:Y,w,h:hh,a:99999,bar:0,ring:t=='ring',ac:false,sx:1,sy:1,rot:0,k:1}}
 $('aType').onchange=e=>{const v=e.target.value;if(!v)return;const s=mkShape(v);s.ox=384;s.oy=543;S.added.push(s);S.sel=s.id;S.selT=null;e.target.value='';sync();render()};
+$('cType').onchange=e=>{const v=e.target.value;if(!v)return;const c=mkCluster(v),n=S.added.length%6*18,s={id:++aid,d:c.d,cx:384+n,cy:543+n,ox:384,oy:543,w:c.w,h:c.h,a:99999,bar:0,ring:false,ac:false,sx:1,sy:1,rot:0,k:1.5,cluster:true,tpl:S.ver};S.added.push(s);S.sel=s.id;S.selT=null;e.target.value='';sync();render()};
 $('sColor').oninput=e=>{ov().color=e.target.value;render()};
 $('sReset').onclick=()=>{delete ov().color;sync();render()};
 $('sOut').onchange=e=>{ov().out=e.target.checked;sync();render()};
@@ -259,10 +278,12 @@ const vp=$('vp'),stage=$('stage');
 const toSvg=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())};
 function open(i){document.querySelectorAll('.ac')[i].classList.add('open')}
 vp.addEventListener('pointerdown',e=>{
- if(e.target.closest('[data-del]')){delShape();return}
+ if(e.target.closest('[data-del]')){if(S.sel!=null)delShape();else if(S.selT!=null)$('tDel').click();return}
  const hh=e.target.closest('[data-h]');
- if(hh&&S.sel!=null){const o=S.over[S.sel]||(S.over[S.sel]={}),p=toSvg(e),cx=+hh.dataset.cx,cy=+hh.dataset.cy;
-  drag=hh.dataset.h=='rot'?{k:'rot',o,cx,cy,a0:Math.atan2(p.y-cy,p.x-cx),r0:o.rot||0}:{k:'size',o,cx,cy,d0:Math.hypot(p.x-cx,p.y-cy)||1,s0:o.s||1};
+ if(hh){const p=toSvg(e),cx=+hh.dataset.cx,cy=+hh.dataset.cy,rot=hh.dataset.h=='rot',a0=Math.atan2(p.y-cy,p.x-cx),d0=Math.hypot(p.x-cx,p.y-cy)||1;
+  if(hh.dataset.k=='s'&&S.sel!=null){const o=S.over[S.sel]||(S.over[S.sel]={});drag=rot?{k:'rot',o,cx,cy,a0,r0:o.rot||0}:{k:'size',o,cx,cy,d0,s0:o.s||1}}
+  else if(hh.dataset.k=='t'&&T()){const t=T();drag=rot?{k:'trot',t,cx,cy,a0,r0:t.rot||0}:{k:'tsize',t,cx,cy,d0,fs0:t.fs||SC[t.sz],x0:t.x,y0:t.y,tl0:t.tl?t.tl.slice():null}}
+  else return;
   vp.setPointerCapture(e.pointerId);return}
  const tx=e.target.closest('[data-t]'),sh=e.target.closest('[data-s]');
  if(tx){const t=S.texts.find(x=>x.id==tx.dataset.t),p=toSvg(e);S.selT=t.id;S.sel=null;drag={k:'t',t,dx:p.x-t.x,dy:p.y-t.y};open(4);sync();render()}
@@ -272,6 +293,9 @@ vp.addEventListener('pointerdown',e=>{
 vp.addEventListener('pointermove',e=>{if(!drag)return;
  if(drag.k=='p'){view.x=e.clientX-drag.x;view.y=e.clientY-drag.y;apply()}
  else if(drag.k=='rot'){const p=toSvg(e);let r=drag.r0+(Math.atan2(p.y-drag.cy,p.x-drag.cx)-drag.a0)*180/Math.PI;if(e.shiftKey)r=Math.round(r/15)*15;drag.o.rot=((r+540)%360+360)%360-180;sync();render()}
+ else if(drag.k=='trot'){const p=toSvg(e);let r=(drag.r0||0)+(Math.atan2(p.y-drag.cy,p.x-drag.cx)-drag.a0)*180/Math.PI;if(e.shiftKey)r=Math.round(r/15)*15;drag.t.rot=((r+540)%360+360)%360-180;render()}
+ else if(drag.k=='tsize'){const p=toSvg(e),t=drag.t,fs=Math.min(600,Math.max(6,drag.fs0*Math.hypot(p.x-drag.cx,p.y-drag.cy)/drag.d0)),r=fs/drag.fs0;
+  t.fs=fs;t.x=drag.cx+(drag.x0-drag.cx)*r;t.y=drag.cy+(drag.y0-drag.cy)*r;if(drag.tl0)t.tl=drag.tl0.map(v=>v*r);t.sz=SC.reduce((bi,v,i)=>Math.abs(v-fs)<Math.abs(SC[bi]-fs)?i:bi,0);sync();render()}
  else if(drag.k=='size'){const p=toSvg(e);drag.o.s=Math.min(6,Math.max(.1,drag.s0*Math.hypot(p.x-drag.cx,p.y-drag.cy)/drag.d0));sync();render()}
  else if(drag.k=='s'){const p=toSvg(e),f=W/768;drag.o.dx=drag.dx+(p.x-drag.px)/f;drag.o.dy=drag.dy+(p.y-drag.py)/f;render()}
  else{const p=toSvg(e);let x=p.x-drag.dx,y=p.y-drag.dy;
@@ -327,19 +351,23 @@ function pdfFromJpeg(jpg,iw,ih){
 $('dPdf').onclick=async()=>{const c=await raster(3),jpg=new Uint8Array(await(await toBlob(c,'image/jpeg',.95)).arrayBuffer());
  save(pdfFromJpeg(jpg,c.width,c.height),'poster.pdf')};
 /* ---------- undo / redo / reset ---------- */
-const TEXTS0=JSON.stringify(S.texts),KEYS=['ver','bg','fg','g','over','del','texts','added','fx','str','pat','patSize'];
-const snap=()=>{const o={};KEYS.forEach(k=>o[k]=S[k]);o.over=Object.fromEntries(Object.entries(S.over).filter(([,v])=>Object.keys(v).length));return JSON.stringify(o)};
+const TEXTS0=JSON.stringify(S.texts),TK=['bg','fg','g','over','del','added','texts','fx','str','pat','patSize'];
+S.tpls={};
+const DEF=v=>({bg:'#F4F4F1',fg:'#000000',g:1,over:{},del:{},added:[],texts:v==1?JSON.parse(TEXTS0):[],fx:'none',str:.6,pat:'none',patSize:10});
+const saveT=()=>{S.tpls[S.ver]=Object.fromEntries(TK.map(k=>[k,S[k]]))};
+const loadT=v=>{const t=S.tpls[v]||DEF(v);TK.forEach(k=>S[k]=t[k])};
+function syncUI(){$('cBg').value=S.bg;$('cFg').value=S.fg;$('gScale').value=S.g;$('gSv').textContent=Math.round(S.g*100)+'%';$('fStr').value=S.str}
+function switchTo(v){saveT();S.ver=v;loadT(v);S.sel=null;S.selT=null;syncUI();sync();render()}
+const snap=()=>{saveT();const tp={};Object.entries(S.tpls).forEach(([v,t])=>tp[v]={...t,over:Object.fromEntries(Object.entries(t.over).filter(([,x])=>Object.keys(x).length))});return JSON.stringify({ver:S.ver,tpls:tp})};
 let hist=[snap()],hi=0,ht=null;
 function hbtn(){$('hUndo').disabled=hi<=0;$('hRedo').disabled=hi>=hist.length-1}
 function commit(){const s=snap();if(s===hist[hi])return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>100)hist.shift();hi=hist.length-1;hbtn()}
 function later(){clearTimeout(ht);ht=setTimeout(commit,300)}
 ['pointerup','change','input','click','keyup'].forEach(t=>document.addEventListener(t,later,true));
-function restore(s){Object.assign(S,JSON.parse(s));if(!S.texts.some(t=>t.id==S.selT))S.selT=null;S.sel=null;
- $('cBg').value=S.bg;$('cFg').value=S.fg;$('gScale').value=S.g;$('gSv').textContent=Math.round(S.g*100)+'%';$('fStr').value=S.str;sync();render()}
+function restore(s){const o=JSON.parse(s);S.ver=o.ver;S.tpls=o.tpls;loadT(S.ver);if(!S.texts.some(t=>t.id==S.selT))S.selT=null;S.sel=null;syncUI();sync();render()}
 function undo(){clearTimeout(ht);commit();if(hi>0){hi--;restore(hist[hi]);hbtn()}}
 function redo(){clearTimeout(ht);commit();if(hi<hist.length-1){hi++;restore(hist[hi]);hbtn()}}
-function resetT(){clearTimeout(ht);commit();Object.assign(S,{bg:'#F4F4F1',fg:'#000000',g:1,over:{},del:{},added:[],texts:JSON.parse(TEXTS0),fx:'none',str:.6,pat:'none',patSize:10,sel:null,selT:null});
- restore(snap());commit()}
+function resetT(){clearTimeout(ht);commit();S.tpls[S.ver]=DEF(S.ver);loadT(S.ver);S.sel=null;S.selT=null;syncUI();sync();render();commit()}
 $('hUndo').onclick=undo;$('hRedo').onclick=redo;$('hReset').onclick=resetT;
 addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;
  const k=e.key.toLowerCase();if(k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(k=='y'){e.preventDefault();redo()}});
