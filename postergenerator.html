@@ -33,9 +33,9 @@ input[type=range]{width:100%;accent-color:var(--fg)}input[type=color]{width:40px
 #stage{position:absolute;left:0;top:0;transform-origin:0 0;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 #svg{display:block;width:640px;height:905px;touch-action:none}
 #tools{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:3;display:flex;gap:16px;white-space:nowrap}
-#bar,#hist{display:flex;border:1px solid var(--fg);background:var(--bg)}
-#bar button,#hist button{all:unset;padding:8px 14px;cursor:pointer;border-right:1px solid var(--fg);font-size:13px}#bar button:last-child,#hist button:last-child{border:0}
-#bar button:hover,#hist button:hover:not(:disabled){background:var(--fg);color:var(--bg)}#bar button:focus-visible,#hist button:focus-visible{outline:2px solid var(--fg);outline-offset:-4px}#hist button:disabled{opacity:.35;cursor:default}
+#bar,#hist,#dupg{display:flex;border:1px solid var(--fg);background:var(--bg)}
+#bar button,#hist button,#dupg button{all:unset;padding:8px 14px;cursor:pointer;border-right:1px solid var(--fg);font-size:13px}#bar button:last-child,#hist button:last-child,#dupg button:last-child{border:0}
+#bar button:hover,#hist button:hover:not(:disabled),#dupg button:hover:not(:disabled){background:var(--fg);color:var(--bg)}#bar button:focus-visible,#hist button:focus-visible,#dupg button:focus-visible{outline:2px solid var(--fg);outline-offset:-4px}#hist button:disabled,#dupg button:disabled{opacity:.35;cursor:default}
 @media (max-width:800px){body{flex-direction:column-reverse}#side{width:100%;height:46%;border-right:0;border-top:1px solid var(--fg)}#main{height:54%;flex:none}}
 @media (prefers-reduced-motion:reduce){.bd,.hd i{transition:none}}
 </style></head><body>
@@ -99,7 +99,7 @@ input[type=range]{width:100%;accent-color:var(--fg)}input[type=color]{width:40px
 </aside>
 
 <div id="main"><div id="vp"><div id="stage"><svg id="svg" viewBox="0 0 1066 1508" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
-<div id="tools"><div id="hist"><button id="hUndo" title="Undo (Ctrl+Z)">Undo</button><button id="hRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button id="hReset" title="Reset this template">Reset</button></div><div id="bar"><button id="zi">Zoom in</button><button id="zo">Zoom out</button><button id="z1">100%</button><button id="zf">Fit</button></div></div></div>
+<div id="tools"><div id="hist"><button id="hUndo" title="Undo (Ctrl+Z)">Undo</button><button id="hRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button id="hReset" title="Reset this template">Reset</button></div><div id="bar"><button id="zi">Zoom in</button><button id="zo">Zoom out</button><button id="z1">100%</button><button id="zf">Fit</button></div><div id="dupg"><button id="dup" title="Duplicate the selected shape, cluster or text (Ctrl+D)" disabled>Duplicate</button></div></div></div>
 
 <script>
 const W=1066,H=1508,SC=[8,11,16,21,28,37,49,65,87,116,155,207,276];
@@ -265,7 +265,7 @@ $('tUp').onchange=async e=>{const f=e.target.files[0];if(!f||!T())return;const n
 function sync(){
  document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',+b.dataset.v==S.ver));
  document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f==S.fx));
- $('fSv').textContent=Math.round(S.str*100)+'%';document.querySelectorAll('[data-pt]').forEach(b=>b.classList.toggle('on',b.dataset.pt==S.pat));$('pSize').value=S.patSize;$('pSv').textContent=S.patSize+' px';
+ $('fSv').textContent=Math.round(S.str*100)+'%';$('dup').disabled=S.sel==null&&S.selT==null;document.querySelectorAll('[data-pt]').forEach(b=>b.classList.toggle('on',b.dataset.pt==S.pat));$('pSize').value=S.patSize;$('pSv').textContent=S.patSize+' px';
  const has=S.sel!=null;$('selUI').hidden=!has;$('noSel').hidden=has;
  if(has){const o=S.over[S.sel]||{},s=layout(S.ver).find(x=>x.id==S.sel);
   $('sColor').value=o.color||(s?col(s):'#000000');$('sOut').checked=!!o.out;$('owWrap').hidden=!o.out;$('sOw').value=o.ow||3;$('owV').textContent=(o.ow||3)+' px';$('sScale').value=o.s||1;$('sSv').textContent=Math.round((o.s||1)*100)+'%';$('sRot').value=o.rot||0}
@@ -368,6 +368,12 @@ function restore(s){const o=JSON.parse(s);S.ver=o.ver;S.tpls=o.tpls;loadT(S.ver)
 function undo(){clearTimeout(ht);commit();if(hi>0){hi--;restore(hist[hi]);hbtn()}}
 function redo(){clearTimeout(ht);commit();if(hi<hist.length-1){hi++;restore(hist[hi]);hbtn()}}
 function resetT(){clearTimeout(ht);commit();S.tpls[S.ver]=DEF(S.ver);loadT(S.ver);S.sel=null;S.selT=null;syncUI();sync();render();commit()}
+function duplicate(){
+ if(S.selT!=null){const t=S.texts.find(x=>x.id==S.selT);if(!t)return;const c=JSON.parse(JSON.stringify(t));c.id=++tid;c.x+=24;c.y+=24;delete c.base;S.texts.push(c);S.selT=c.id;S.sel=null;sync();render();return}
+ if(S.sel!=null){const s=layout(S.ver).find(x=>x.id==S.sel);if(!s)return;const o=S.over[S.sel]||{},id=++aid;
+  S.added.push({...s,id,tpl:S.ver});S.over[id]={...o,dx:(o.dx||0)+24,dy:(o.dy||0)+24};S.sel=id;S.selT=null;sync();render()}}
+$('dup').onclick=duplicate;
+addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.key.toLowerCase()!='d')return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;e.preventDefault();duplicate()});
 $('hUndo').onclick=undo;$('hRedo').onclick=redo;$('hReset').onclick=resetT;
 addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;
  const k=e.key.toLowerCase();if(k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(k=='y'){e.preventDefault();redo()}});
