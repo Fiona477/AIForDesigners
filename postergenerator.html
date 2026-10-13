@@ -99,7 +99,7 @@ input[type=range]{width:100%;accent-color:var(--fg)}input[type=color]{width:40px
 </aside>
 
 <div id="main"><div id="vp"><div id="stage"><svg id="svg" viewBox="0 0 1066 1508" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
-<div id="tools"><div id="hist"><button id="hUndo" title="Undo (Ctrl+Z)">Undo</button><button id="hRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button id="hReset" title="Reset this template">Reset</button></div><div id="bar"><button id="zi">Zoom in</button><button id="zo">Zoom out</button><button id="z1">100%</button><button id="zf">Fit</button></div><div id="dupg"><button id="dup" title="Duplicate the selected shape, cluster or text (Ctrl+D)" disabled>Duplicate</button></div></div></div>
+<div id="tools"><div id="hist"><button id="hUndo" title="Undo (Ctrl+Z)">Undo</button><button id="hRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button id="hReset" title="Reset this template">Reset</button></div><div id="bar"><button id="zi">Zoom in</button><button id="zo">Zoom out</button><button id="z1">100%</button><button id="zf">Fit</button></div><div id="dupg"><button id="dup" title="Duplicate the selected shape, cluster or text (Ctrl+D)" disabled>Duplicate</button></div><div id="dupg" style="margin-left:0"><button id="clr" title="Remove all shapes from this template (text is kept)">Remove all shapes</button></div></div></div>
 
 <script>
 const W=1066,H=1508,SC=[8,11,16,21,28,37,49,65,87,116,155,207,276];
@@ -375,7 +375,7 @@ function duplicate(){
  if(S.selT!=null){const t=S.texts.find(x=>x.id==S.selT);if(!t)return;const c=JSON.parse(JSON.stringify(t));c.id=++tid;c.x+=24;c.y+=24;delete c.base;S.texts.push(c);S.selT=c.id;S.sel=null;sync();render();return}
  if(S.sel!=null){const s=layout(S.ver).find(x=>x.id==S.sel);if(!s)return;const o=S.over[S.sel]||{},id=++aid;
   S.added.push({...s,id,tpl:S.ver});S.over[id]={...o,dx:(o.dx||0)+24,dy:(o.dy||0)+24};S.sel=id;S.selT=null;sync();render()}}
-$('dup').onclick=duplicate;
+$('dup').onclick=duplicate;$('clr').onclick=()=>{layout(S.ver).forEach(x=>{S.del[x.id]=1});S.sel=null;sync();render()};
 addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.key.toLowerCase()!='d')return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;e.preventDefault();duplicate()});
 $('hUndo').onclick=undo;$('hRedo').onclick=redo;$('hReset').onclick=resetT;
 addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&!/color|range|checkbox|file/.test(a.type||''))return;
