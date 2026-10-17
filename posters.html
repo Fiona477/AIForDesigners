@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f2ee;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #77736b;
+    --line: #dcd8d0;
+    --accent: #d9481c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111110;
+      --card: #1b1a19;
+      --ink: #efece6;
+      --muted: #8f8a80;
+      --line: #2e2c29;
+      --accent: #ff6a3d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111110; --card: #1b1a19; --ink: #efece6;
+    --muted: #8f8a80; --line: #2e2c29; --accent: #ff6a3d;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, system-ui, sans-serif;
+    padding: clamp(24px, 5vw, 64px) 16px;
+    min-height: 100vh;
+  }
+  header {
+    max-width: 960px;
+    margin: 0 auto 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+  }
+  h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.02em; }
+  header p { color: var(--muted); font-size: 14px; }
+
+  .grid {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  /* center the odd fifth poster under the pairs */
+  .grid figure:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 12px);
+  }
+
+  figure {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: zoom-in;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  figure:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.12); }
+
+
+  .frame {
+    aspect-ratio: 2 / 3;
+    border-radius: 6px;
+    overflow: hidden;
+    background: repeating-linear-gradient(45deg, var(--line) 0 1px, transparent 1px 10px);
+    display: grid;
+    place-items: center;
+  }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .missing { color: var(--muted); font-size: 12px; font-family: "JetBrains Mono", monospace; }
+
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 4px 4px;
+    font-size: 13px;
+  }
+  .step {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .name { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 12px; }
+
+  /* lightbox */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.88);
+    display: none;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+    padding: 24px 16px;
+    z-index: 10;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 82vh; border-radius: 6px; }
+  .lightbox .bar {
+    display: flex; gap: 24px; align-items: center;
+    color: #eee; font-family: "JetBrains Mono", monospace; font-size: 13px;
+  }
+  .lightbox button {
+    background: none; border: 1px solid #555; color: #eee;
+    border-radius: 999px; width: 38px; height: 38px;
+    font-size: 16px; cursor: pointer;
+  }
+  .lightbox button:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Posters</h1>
+    <p>5 generations · click any frame to enlarge · ← → to step through</p>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+    <img id="lbImg" alt="">
+    <div class="bar">
+      <button id="prev" aria-label="Previous">←</button>
+      <span id="lbLabel"></span>
+      <button id="next" aria-label="Next">→</button>
+      <button id="close" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+<script>
+  const files = ["poster1.jpg", "poster2.jpg", "poster3.jpg", "poster4.jpg", "poster5.jpg"];
+  const grid = document.getElementById("grid");
+
+  files.forEach((src, i) => {
+    const fig = document.createElement("figure");
+    fig.innerHTML = `
+      <div class="frame">
+        <img src="${src}" alt="Generation ${i + 1}" loading="lazy">
+      </div>
+      <figcaption>
+        <span class="step">${String(i + 1).padStart(2, "0")} / ${String(files.length).padStart(2, "0")}</span>
+        <span class="name">${src}</span>
+      </figcaption>`;
+    const img = fig.querySelector("img");
+    img.onerror = () => {
+      img.replaceWith(Object.assign(document.createElement("span"), {
+        className: "missing", textContent: `${src} not found`
+      }));
+    };
+    fig.addEventListener("click", () => open(i));
+    grid.appendChild(fig);
+  });
+
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbLabel = document.getElementById("lbLabel");
+  let current = 0;
+
+  function open(i) {
+    current = (i + files.length) % files.length;
+    lbImg.src = files[current];
+    lbImg.alt = `Generation ${current + 1}`;
+    lbLabel.textContent = `${current + 1} / ${files.length} — ${files[current]}`;
+    lb.classList.add("open");
+  }
+  function close() { lb.classList.remove("open"); }
+
+  document.getElementById("prev").onclick = e => { e.stopPropagation(); open(current - 1); };
+  document.getElementById("next").onclick = e => { e.stopPropagation(); open(current + 1); };
+  document.getElementById("close").onclick = close;
+  lb.addEventListener("click", e => { if (e.target === lb) close(); });
+  document.addEventListener("keydown", e => {
+    if (!lb.classList.contains("open")) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowLeft") open(current - 1);
+    if (e.key === "ArrowRight") open(current + 1);
+  });
+</script>
+</body>
+</html>
