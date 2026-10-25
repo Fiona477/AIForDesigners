@@ -32,7 +32,7 @@ a{color:inherit}
 .masthead .date{font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:12px}
 
 /* Section nav */
-.sections{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
+.sections{position:sticky;top:0;z-index:5;background:#fff;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
 .sections a{text-decoration:none}
 .sections a:hover,.sections a.current{text-decoration:underline;text-underline-offset:4px}
 
@@ -58,7 +58,7 @@ figure{margin:0}
 figure img{width:100%;display:block;background:#f2f2f2}
 figcaption{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:baseline}
 .num{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--red);white-space:nowrap}
-.cap{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.4;color:#333}
+.cap{font-family:var(--serif);font-size:17px;line-height:1.4;color:#333}
 
 /* End mark + footer */
 .end{text-align:center;margin:64px 0 0;font-size:22px}
