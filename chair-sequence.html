@@ -1,1 +1,144 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Image Generation Process</title><style>*{box-sizing:border-box}body{margin:0;font-family:Georgia,'Times New Roman',serif;background:#fff;color:#111}header{max-width:1400px;margin:80px auto 60px;padding:0 24px}h1{font-size:3rem;font-weight:400;margin:0}.subtitle{font-size:1.1rem;color:#666;margin-top:12px}.grid{max-width:1400px;margin:0 auto 80px;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px}.card{border:1px solid #e5e5e5;background:#fff;transition:.3s}.card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08)}.img-wrap{overflow:hidden}.card img{width:100%;display:block;transition:transform .4s}.card:hover img{transform:scale(1.03)}.content{padding:22px}.num{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;color:#777}.prompt{margin-top:12px;line-height:1.6}@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.grid{grid-template-columns:1fr}h1{font-size:2.2rem}}</style></head><body><header><h1>Image Generation Process</h1><p class="subtitle">From a simple chair to a richly detailed living space.</p></header><section class="grid"><div class="card"><div class="img-wrap"><img src="chair1.jpg" alt="Chair 1"></div><div class="content"><div class="num">Generation 1</div><div class="prompt">A chair in the middle of a room.</div></div></div><div class="card"><div class="img-wrap"><img src="chair2.jpg" alt="Chair 2"></div><div class="content"><div class="num">Generation 2</div><div class="prompt">A lounge chair in the middle of a NYC apartment room.</div></div></div><div class="card"><div class="img-wrap"><img src="chair3.jpg" alt="Chair 3"></div><div class="content"><div class="num">Generation 3</div><div class="prompt">A lounge chair that is fluffy. Think big and comfortable.</div></div></div><div class="card"><div class="img-wrap"><img src="chair4.jpg" alt="Chair 4"></div><div class="content"><div class="num">Generation 4</div><div class="prompt">Make the time of day morning, with sunlight hitting the chair. The room should give off a warm feel.</div></div></div><div class="card"><div class="img-wrap"><img src="chair5.jpg" alt="Chair 5"></div><div class="content"><div class="num">Generation 5</div><div class="prompt">Make the image shot from a higher angle, like from the wall. Make sure the furniture and windows are still visible.</div></div></div><div class="card"><div class="img-wrap"><img src="chair6.jpeg" alt="Chair 6"></div><div class="content"><div class="num">Generation 6</div><div class="prompt">Add curtains to the window, and make them open.</div></div></div><div class="card"><div class="img-wrap"><img src="chair7.jpeg" alt="Chair 7"></div><div class="content"><div class="num">Generation 7</div><div class="prompt">Add a sleeping cat next to the chair.</div><div class="card"><div class="img-wrap"><img src="chair8.jpeg" alt="Chair 8"></div><div class="content"><div class="num">Generation 8</div><div class="prompt">Add a cozy cat bed.</div><div class="card"><div class="img-wrap"><img src="chair9.jpeg" alt="Chair 9"></div><div class="content"><div class="num">Generation 9</div><div class="prompt">Different image generator.</div></section></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chair Sequence — Fiona Mei</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111;
+  --muted:#6b6b6b;
+  --rule:#d9d9d9;
+  --red:#444444;
+  --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+  --display:"Libre Caslon Display",Georgia,serif;
+  --sans:Inter,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+/* Top utility bar */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:12px;letter-spacing:.02em}
+.topbar a{text-decoration:none}
+.topbar a:hover{text-decoration:underline}
+
+/* Masthead */
+.masthead{text-align:center;padding:26px 24px 14px}
+.masthead .name{font-family:var(--display);font-size:clamp(44px,7vw,84px);line-height:1;margin:0;font-weight:400;letter-spacing:.01em}
+.masthead .date{font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:12px}
+
+/* Section nav */
+.sections{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
+.sections a{text-decoration:none}
+.sections a:hover,.sections a.current{text-decoration:underline;text-underline-offset:4px}
+
+/* Article header */
+article{max-width:1080px;margin:0 auto;padding:0 24px}
+.head{max-width:720px;margin:64px auto 40px;text-align:center}
+.rubric{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--red);text-decoration:none}
+.head h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,6vw,68px);line-height:1.05;margin:16px 0 18px}
+.dek{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.4;color:#333;margin:0 auto 22px;max-width:620px}
+.byline{font-family:var(--sans);font-size:13px;letter-spacing:.02em}
+.byline strong{font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.byline .meta{display:block;color:var(--muted);margin-top:6px;font-size:12px}
+
+/* Body text */
+.body{max-width:640px;margin:0 auto 56px;font-size:20px;line-height:1.6}
+.body a{text-decoration-color:var(--red);text-underline-offset:3px}
+
+/* Sequence */
+.sequence{border-top:1px solid var(--ink);padding-top:28px}
+.seq-label{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;margin:0 0 28px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:56px 32px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+figure{margin:0}
+figure img{width:100%;display:block;background:#f2f2f2}
+figcaption{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:baseline}
+.num{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--red);white-space:nowrap}
+.cap{font-family:var(--serif);font-size:17px;line-height:1.4;color:#333}
+
+/* End mark + footer */
+.end{text-align:center;margin:64px 0 0;font-size:22px}
+footer{margin-top:72px;border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.8}
+footer a{color:var(--ink)}
+
+@media(max-width:760px){
+  .grid{grid-template-columns:1fr;gap:44px}
+  .head{margin-top:44px}
+  .body{font-size:18px}
+  .topbar .hide-sm{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="sections">
+  <a href="index.html">← Back Home</a>
+</nav>
+
+<article>
+  <div class="head">
+    <a class="rubric" href="index.html">A.I. for Designers</a>
+    <h1>Chair Sequence</h1>
+    <div class="byline"><span class="meta">Image Generation Sequence</span></div>
+  </div>
+
+  <div class="body">
+    <p>Developed a sequence of image generations based on prompt refining.</p>
+  </div>
+
+  <section class="sequence">
+    <p class="seq-label">The Sequence</p>
+    <div class="grid">
+      <figure>
+        <img src="chair1.jpg" alt="Chair, generation 1">
+        <figcaption><span class="num">Gen. 01</span><span class="cap">A chair in the middle of a room.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair2.jpg" alt="Chair, generation 2">
+        <figcaption><span class="num">Gen. 02</span><span class="cap">A lounge chair in the middle of a NYC apartment room.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair3.jpg" alt="Chair, generation 3">
+        <figcaption><span class="num">Gen. 03</span><span class="cap">A lounge chair that is fluffy. Think big and comfortable.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair4.jpg" alt="Chair, generation 4">
+        <figcaption><span class="num">Gen. 04</span><span class="cap">Make the time of day morning, with sunlight hitting the chair. The room should give off a warm feel.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair5.jpg" alt="Chair, generation 5">
+        <figcaption><span class="num">Gen. 05</span><span class="cap">Make the image shot from a higher angle, like from the wall. Make sure the furniture and windows are still visible.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair6.jpeg" alt="Chair, generation 6">
+        <figcaption><span class="num">Gen. 06</span><span class="cap">Add curtains to the window, and make them open.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair7.jpeg" alt="Chair, generation 7">
+        <figcaption><span class="num">Gen. 07</span><span class="cap">Add a sleeping cat next to the chair.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair8.jpeg" alt="Chair, generation 8">
+        <figcaption><span class="num">Gen. 08</span><span class="cap">Add a cozy cat bed.</span></figcaption>
+      </figure>
+      <figure>
+        <img src="chair9.jpeg" alt="Chair, generation 9">
+        <figcaption><span class="num">Gen. 09</span><span class="cap">Different image generator.</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <p class="end">♦</p>
+</article>
+
+<footer>
+  Fiona Mei · A.I. for Designers · ART 3041, Fall 2026
+</footer>
+
+</body>
+</html>
