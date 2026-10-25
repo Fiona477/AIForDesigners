@@ -1,1 +1,110 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A.I. FOR DESIGNERS — FIONA MEI</title><style>body{margin:0;font-family:"Times New Roman",serif;overflow-x:hidden}.hero{display:grid;grid-template-columns:40% 60%;min-height:100vh;padding-left:1in}.hero-copy{padding-top:.5in;padding-right:24px;padding-bottom:1in}.hero-image{position:relative;min-height:100vh;margin-left:.5in;overflow:hidden}.hero-image img{width:calc(100% + 1in);height:100%;object-fit:cover;object-position:calc(-0.5in) center;display:block}.overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:.35s ease;display:flex;align-items:center;justify-content:center;padding:40px}.overlay-text{color:#fff;font-size:2rem;text-align:center;opacity:0;transition:.35s ease;max-width:600px}.hero-image.active .overlay{background:rgba(0,0,0,.6)}.hero-image.active .overlay-text{opacity:1}h1,h2{font-family:Irvin,Georgia,serif;font-weight:300}h1{font-size:clamp(2.7rem,5vw,5rem)}h2{font-size:clamp(1.5rem,3vw,2.2rem);margin:.4in 0 24px}.button{display:inline-block;border:1px solid #111;color:#111;text-decoration:none;padding:14px 24px;border-radius:12px}.button:hover{text-decoration:underline}.work-list{display:flex;flex-direction:column;gap:20px}.work-item{display:flex;gap:18px;align-items:center}</style></head><body><section class="hero"><div class="hero-copy"><div style="margin-bottom:0">A.I. FOR DESIGNERS</div><h1 style="margin-top:0">FIONA MEI</h1><p style="margin-bottom:0">ART 3041 · Fall 2026</p><p style="margin-top:0"><a href="mailto:fiona.mei649@stu-mail.baruch.cuny.edu" style="color:#111">fiona.mei649@stu-mail.baruch.cuny.edu</a></p><p><i>This course explores the usage of A.I. in creative practice. Below are selected assignments and experiments.</i></p><h2>WORK</h2><div class="work-list"><div class="work-item"><span>01</span><a class="button" href="#" data-msg="In progress">Custom Instructions</a></div><div class="work-item"><span>02</span><a class="button" href="#" data-msg="In progress">A Style Guide for Your AI</a></div><div class="work-item"><span>03</span><a class="button" href="design-a.html" data-msg="I designed a world clock that features cities around the world.">Design a ___</a></div><div class="work-item"><span>04</span><a class="button" href="commute.html" data-msg="In progress">Commute Story</a></div><div class="work-item"><span>05</span><a class="button" href="#" data-msg="In progress">Become a Crea(i)tive Director</a></div><div class="work-item"><span>06</span><a class="button" href="#" data-msg="In progress">Experimental AI Interface</a></div><div class="work-item"><span>07</span><a class="button" href="#" data-msg="In progress">Open</a></div><div class="work-item"><span>08</span><a class="button" href="chair-sequence.html" data-msg="I prompted a sequence of image generations for a chair.">Chair Sequence</a></div><div class="work-item"><span>09</span><a class="button" href="promotion.jpg" data-msg="In progress">Promotional Poster</a></div><div class="work-item"><span>10</span><a class="button" href="postergenerator.html" data-msg="In progress">Poster Generator</a></div><div class="work-item"><span>11</span><a class="button" href="posters.html" data-msg="Poster Generator Samples">Poster Samples</a></div><div class="work-item"><span>12</span><a class="button" href="data.html" data-msg="Live stream data poster generator">Live stream data</a></div><div class="work-item"><span>13</span><a class="button" href="variable.html" data-msg="Variable Type">Variable Type</a></div><div class="work-item"><span>14</span><a class="button" href="sketch.html" data-msg="Sketch">Mission Patch Sketch</a></div></div></div><div class="hero-image" id="heroImage"><img src="hero.png" alt="Hero"><div class="overlay"><div class="overlay-text" id="overlayText">Movie Poster</div></div></div></section><script>const hero=document.getElementById('heroImage');const txt=document.getElementById('overlayText');document.querySelectorAll('.button').forEach(btn=>{btn.addEventListener('mouseenter',()=>{hero.classList.add('active');txt.textContent=btn.dataset.msg||'In progress';});btn.addEventListener('mouseleave',()=>{hero.classList.remove('active');});});</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A.I. FOR DESIGNERS — FIONA MEI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111;
+  --muted:#6b6b6b;
+  --rule:#d9d9d9;
+  --accent:#444444;
+  --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+  --display:"Libre Caslon Display",Georgia,serif;
+  --sans:Inter,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+
+/* Top bar */
+.sections{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
+
+/* Layout */
+.hero{display:grid;grid-template-columns:44% 56%;min-height:100vh}
+.hero-copy{padding:56px 48px 80px 1in}
+.hero-image{position:sticky;top:0;height:100vh;overflow:hidden;border-left:1px solid var(--rule)}
+.hero-image img{width:100%;height:100%;object-fit:cover;display:block}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:.35s ease;display:flex;align-items:center;justify-content:center;padding:48px}
+.overlay-text{color:#fff;font-family:var(--serif);font-size:clamp(1.25rem,2.1vw,1.8rem);line-height:1.35;text-align:left;opacity:0;transition:.35s ease;max-width:560px}
+.hero-image.active .overlay{background:rgba(0,0,0,.6)}
+.hero-image.active .overlay-text{opacity:1}
+
+/* Header copy */
+.rubric{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.7rem,5.4vw,4.8rem);line-height:1;margin:14px 0 20px}
+.meta{font-family:var(--sans);font-size:13px;line-height:1.7;color:var(--muted)}
+.meta a{color:var(--ink);text-underline-offset:3px}
+.dek{font-size:clamp(16px,1.6vw,19px);line-height:1.5;color:#333;margin:24px 0 0;max-width:520px}
+
+/* Work list */
+.work-label{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;margin:56px 0 0;padding-bottom:12px;border-bottom:1px solid var(--ink)}
+.work-list{list-style:none;margin:0;padding:0}
+.work-item{border-bottom:1px solid var(--rule)}
+.work-item a{display:flex;gap:20px;align-items:baseline;padding:14px 0;text-decoration:none}
+.num{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--ink);min-width:2em}
+.title{font-family:var(--serif);font-size:clamp(17px,1.5vw,20px);line-height:1.3}
+.work-item a:hover .title{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+
+footer{border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;font-family:var(--sans);font-size:11px;color:var(--muted)}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .hero-copy{padding:40px 24px 56px}
+  .hero-image{position:relative;height:70vh;border-left:0;border-top:1px solid var(--rule)}
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-copy">
+    <div class="rubric">A.I. for Designers</div>
+    <h1>Fiona Mei</h1>
+    <div class="meta">
+      ART 3041 · Fall 2026<br>
+      <a href="mailto:fiona.mei649@stu-mail.baruch.cuny.edu">fiona.mei649@stu-mail.baruch.cuny.edu</a>
+    </div>
+    <p class="dek">This course explores the usage of A.I. in creative practice. Below are selected assignments and experiments.</p>
+
+    <p class="work-label">Work</p>
+    <ul class="work-list">
+      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">01</span><span class="title">Custom Instructions</span></a></li>
+      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">02</span><span class="title">A Style Guide for Your AI</span></a></li>
+      <li class="work-item"><a href="design-a.html" data-msg="I designed a world clock that features cities around the world."><span class="num">03</span><span class="title">Design a ___</span></a></li>
+      <li class="work-item"><a href="commute.html" data-msg="In progress"><span class="num">04</span><span class="title">Commute Story</span></a></li>
+      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">05</span><span class="title">Become a Crea(i)tive Director</span></a></li>
+      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">06</span><span class="title">Experimental AI Interface</span></a></li>
+      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">07</span><span class="title">Open</span></a></li>
+      <li class="work-item"><a href="chair-sequence.html" data-msg="I prompted a sequence of image generations for a chair."><span class="num">08</span><span class="title">Chair Sequence</span></a></li>
+      <li class="work-item"><a href="promotion.jpg" data-msg="In progress"><span class="num">09</span><span class="title">Promotional Poster</span></a></li>
+      <li class="work-item"><a href="postergenerator.html" data-msg="In progress"><span class="num">10</span><span class="title">Poster Generator</span></a></li>
+      <li class="work-item"><a href="posters.html" data-msg="Poster Generator Samples"><span class="num">11</span><span class="title">Poster Samples</span></a></li>
+      <li class="work-item"><a href="data.html" data-msg="Live stream data poster generator"><span class="num">12</span><span class="title">Live stream data</span></a></li>
+      <li class="work-item"><a href="variable.html" data-msg="Variable Type"><span class="num">13</span><span class="title">Variable Type</span></a></li>
+      <li class="work-item"><a href="sketch.html" data-msg="Sketch"><span class="num">14</span><span class="title">Mission Patch Sketch</span></a></li>
+    </ul>
+  </div>
+
+  <div class="hero-image" id="heroImage">
+    <img src="hero.png" alt="Hero">
+    <div class="overlay"><div class="overlay-text" id="overlayText">Movie Poster</div></div>
+  </div>
+</section>
+
+<footer>Fiona Mei · A.I. for Designers · ART 3041, Fall 2026</footer>
+
+<script>
+const hero=document.getElementById('heroImage');
+const txt=document.getElementById('overlayText');
+document.querySelectorAll('.work-item a').forEach(link=>{
+  link.addEventListener('mouseenter',()=>{hero.classList.add('active');txt.textContent=link.dataset.msg||'In progress';});
+  link.addEventListener('mouseleave',()=>{hero.classList.remove('active');});
+});
+</script>
+</body>
+</html>
