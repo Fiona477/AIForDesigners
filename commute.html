@@ -1,1 +1,123 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Commute Sequence</title><style>body{margin:0;background:#fff;color:#111;font-family:Georgia,'Times New Roman',serif}header{border-bottom:1px solid #ddd;padding:28px 0 18px;text-align:center}h1{margin:0;font-size:54px;font-weight:400;letter-spacing:.5px}main{max-width:1100px;margin:40px auto;padding:0 24px}.kicker{text-transform:uppercase;letter-spacing:2px;font-size:12px;text-align:center;margin-bottom:28px;color:#666}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:40px}.item img{width:100%;display:block}.caption{margin-top:12px;font-size:22px;line-height:1.3}.number{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#666;display:block;margin-bottom:6px}@media(max-width:800px){.grid{grid-template-columns:1fr}h1{font-size:40px}}</style></head><body><header><h1>Commute</h1></header><main><div class="kicker">Image Generation Sequence</div><div class="grid"><div class="item"><img src="commute1.jpg"><div class="caption"><span class="number">Generation 1</span>Commute 1</div></div><div class="item"><img src="commute2.jpg"><div class="caption"><span class="number">Generation 2</span>Commute 2</div></div><div class="item"><img src="commute3.jpg"><div class="caption"><span class="number">Generation 3</span>Commute 3</div></div><div class="item"><img src="commute4.jpg"><div class="caption"><span class="number">Generation 4</span>Commute 4</div></div></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commute Story — Fiona Mei</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111;
+  --muted:#6b6b6b;
+  --rule:#d9d9d9;
+  --red:#444444;
+  --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+  --display:"Libre Caslon Display",Georgia,serif;
+  --sans:Inter,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+/* Top utility bar */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:12px;letter-spacing:.02em}
+.topbar a{text-decoration:none}
+.topbar a:hover{text-decoration:underline}
+
+/* Masthead */
+.masthead{text-align:center;padding:26px 24px 14px}
+.masthead .name{font-family:var(--display);font-size:clamp(44px,7vw,84px);line-height:1;margin:0;font-weight:400;letter-spacing:.01em}
+.masthead .date{font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:12px}
+
+/* Section nav */
+.sections{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
+.sections a{text-decoration:none}
+.sections a:hover,.sections a.current{text-decoration:underline;text-underline-offset:4px}
+
+/* Article header */
+article{max-width:1080px;margin:0 auto;padding:0 24px}
+.head{max-width:720px;margin:64px auto 40px;text-align:center}
+.rubric{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--red);text-decoration:none}
+.head h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,6vw,68px);line-height:1.05;margin:16px 0 18px}
+.dek{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.4;color:#333;margin:0 auto 22px;max-width:620px}
+.byline{font-family:var(--sans);font-size:13px;letter-spacing:.02em}
+.byline strong{font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.byline .meta{display:block;color:var(--muted);margin-top:6px;font-size:12px}
+
+/* Body text */
+.body{max-width:640px;margin:0 auto 56px;font-size:20px;line-height:1.6}
+.body a{text-decoration-color:var(--red);text-underline-offset:3px}
+
+/* Sequence */
+.sequence{border-top:1px solid var(--ink);padding-top:28px}
+.seq-label{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;margin:0 0 28px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:56px 40px}
+figure{margin:0}
+figure img{width:100%;display:block;background:#f2f2f2}
+figcaption{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:baseline}
+.num{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--red);white-space:nowrap}
+.cap{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.4;color:#333}
+
+/* End mark + footer */
+.end{text-align:center;margin:64px 0 0;font-size:22px}
+footer{margin-top:72px;border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.8}
+footer a{color:var(--ink)}
+
+@media(max-width:760px){
+  .grid{grid-template-columns:1fr;gap:44px}
+  .head{margin-top:44px}
+  .body{font-size:18px}
+  .topbar .hide-sm{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="sections">
+  <a href="index.html">← Back Home</a>
+</nav>
+
+<article>
+  <div class="head">
+    <a class="rubric" href="index.html">A.I. for Designers</a>
+    <h1>Commute Story</h1>
+    <div class="byline"><span class="meta">Image Generation Sequence</span></div>
+  </div>
+
+  <div class="body">
+    <p>I utilized Photoshop generative fill to show my commute story to campus.</p>
+  </div>
+
+  <section class="sequence">
+    <p class="seq-label">The Sequence</p>
+    <div class="grid">
+      <figure>
+        <img src="commute1.jpg" alt="Commute, generation 1">
+        <figcaption><span class="num">Gen. 01</span><span class="cap">Commute 1</span></figcaption>
+      </figure>
+      <figure>
+        <img src="commute2.jpg" alt="Commute, generation 2">
+        <figcaption><span class="num">Gen. 02</span><span class="cap">Commute 2</span></figcaption>
+      </figure>
+      <figure>
+        <img src="commute3.jpg" alt="Commute, generation 3">
+        <figcaption><span class="num">Gen. 03</span><span class="cap">Commute 3</span></figcaption>
+      </figure>
+      <figure>
+        <img src="commute4.jpg" alt="Commute, generation 4">
+        <figcaption><span class="num">Gen. 04</span><span class="cap">Commute 4</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <p class="end">♦</p>
+</article>
+
+<footer>
+  Fiona Mei · A.I. for Designers · ART 3041, Fall 2026
+</footer>
+
+</body>
+</html>
