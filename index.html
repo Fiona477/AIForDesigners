@@ -29,10 +29,6 @@ a{color:inherit}
 .hero-copy{padding:56px 48px 80px 1in}
 .hero-image{position:sticky;top:0;height:100vh;overflow:hidden;border-left:1px solid var(--rule)}
 .hero-image img{width:100%;height:100%;object-fit:cover;display:block}
-.overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:.35s ease;display:flex;align-items:center;justify-content:center;padding:48px}
-.overlay-text{color:#fff;font-family:var(--serif);font-size:clamp(1.25rem,2.1vw,1.8rem);line-height:1.35;text-align:left;opacity:0;transition:.35s ease;max-width:560px}
-.hero-image.active .overlay{background:rgba(0,0,0,.6)}
-.hero-image.active .overlay-text{opacity:1}
 
 /* Header copy */
 .rubric{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}
@@ -49,6 +45,9 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(2.7rem,5.4vw,4.8re
 .num{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--ink);min-width:2em}
 .title{font-family:var(--serif);font-size:clamp(17px,1.5vw,20px);line-height:1.3}
 .work-item a:hover .title{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+/* Assignments without a page yet (href="#") are lightened; adding a real link turns them black again */
+.work-item a[href="#"]{color:#b3b3b3;cursor:default;pointer-events:none}
+.work-item a[href="#"] .num{color:#b3b3b3}
 
 footer{border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;font-family:var(--sans);font-size:11px;color:var(--muted)}
 
@@ -73,38 +72,29 @@ footer{border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;
 
     <p class="work-label">Work</p>
     <ul class="work-list">
-      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">01</span><span class="title">Custom Instructions</span></a></li>
-      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">02</span><span class="title">A Style Guide for Your AI</span></a></li>
-      <li class="work-item"><a href="design-a.html" data-msg="I designed a world clock that features cities around the world."><span class="num">03</span><span class="title">Design a ___</span></a></li>
-      <li class="work-item"><a href="commute.html" data-msg="In progress"><span class="num">04</span><span class="title">Commute Story</span></a></li>
-      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">05</span><span class="title">Become a Crea(i)tive Director</span></a></li>
-      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">06</span><span class="title">Experimental AI Interface</span></a></li>
-      <li class="work-item"><a href="#" data-msg="In progress"><span class="num">07</span><span class="title">Open</span></a></li>
-      <li class="work-item"><a href="chair-sequence.html" data-msg="I prompted a sequence of image generations for a chair."><span class="num">08</span><span class="title">Chair Sequence</span></a></li>
-      <li class="work-item"><a href="promotion.jpg" data-msg="In progress"><span class="num">09</span><span class="title">Promotional Poster</span></a></li>
-      <li class="work-item"><a href="postergenerator.html" data-msg="In progress"><span class="num">10</span><span class="title">Poster Generator</span></a></li>
-      <li class="work-item"><a href="posters.html" data-msg="Poster Generator Samples"><span class="num">11</span><span class="title">Poster Samples</span></a></li>
-      <li class="work-item"><a href="data.html" data-msg="Live stream data poster generator"><span class="num">12</span><span class="title">Live stream data</span></a></li>
-      <li class="work-item"><a href="variable.html" data-msg="Variable Type"><span class="num">13</span><span class="title">Variable Type</span></a></li>
-      <li class="work-item"><a href="sketch.html" data-msg="Sketch"><span class="num">14</span><span class="title">Mission Patch Sketch</span></a></li>
+      <li class="work-item"><a href="#"><span class="num">01</span><span class="title">Custom Instructions</span></a></li>
+      <li class="work-item"><a href="#"><span class="num">02</span><span class="title">A Style Guide for Your AI</span></a></li>
+      <li class="work-item"><a href="design-a.html"><span class="num">03</span><span class="title">Design a ___</span></a></li>
+      <li class="work-item"><a href="commute.html"><span class="num">04</span><span class="title">Commute Story</span></a></li>
+      <li class="work-item"><a href="#"><span class="num">05</span><span class="title">Become a Crea(i)tive Director</span></a></li>
+      <li class="work-item"><a href="#"><span class="num">06</span><span class="title">Experimental AI Interface</span></a></li>
+      <li class="work-item"><a href="#"><span class="num">07</span><span class="title">Open</span></a></li>
+      <li class="work-item"><a href="chair-sequence.html"><span class="num">08</span><span class="title">Chair Sequence</span></a></li>
+      <li class="work-item"><a href="promotion.html"><span class="num">09</span><span class="title">Promotional Poster</span></a></li>
+      <li class="work-item"><a href="postergenerator.html"><span class="num">10</span><span class="title">Poster Generator</span></a></li>
+      <li class="work-item"><a href="posters.html"><span class="num">11</span><span class="title">Poster Samples</span></a></li>
+      <li class="work-item"><a href="data.html"><span class="num">12</span><span class="title">Live stream data</span></a></li>
+      <li class="work-item"><a href="variable.html"><span class="num">13</span><span class="title">Variable Type</span></a></li>
+      <li class="work-item"><a href="sketch.html"><span class="num">14</span><span class="title">Mission Patch Sketch</span></a></li>
     </ul>
   </div>
 
   <div class="hero-image" id="heroImage">
     <img src="hero.png" alt="Hero">
-    <div class="overlay"><div class="overlay-text" id="overlayText">Movie Poster</div></div>
   </div>
 </section>
 
 <footer>Fiona Mei · A.I. for Designers · ART 3041, Fall 2026</footer>
 
-<script>
-const hero=document.getElementById('heroImage');
-const txt=document.getElementById('overlayText');
-document.querySelectorAll('.work-item a').forEach(link=>{
-  link.addEventListener('mouseenter',()=>{hero.classList.add('active');txt.textContent=link.dataset.msg||'In progress';});
-  link.addEventListener('mouseleave',()=>{hero.classList.remove('active');});
-});
-</script>
 </body>
 </html>
