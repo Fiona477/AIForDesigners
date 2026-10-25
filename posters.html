@@ -1,192 +1,151 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Posters</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poster Samples — Fiona Mei</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f4f2ee;
-    --card: #ffffff;
-    --ink: #1a1a1a;
-    --muted: #77736b;
-    --line: #dcd8d0;
-    --accent: #d9481c;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #111110;
-      --card: #1b1a19;
-      --ink: #efece6;
-      --muted: #8f8a80;
-      --line: #2e2c29;
-      --accent: #ff6a3d;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #111110; --card: #1b1a19; --ink: #efece6;
-    --muted: #8f8a80; --line: #2e2c29; --accent: #ff6a3d;
-  }
+:root{
+  --ink:#111;
+  --muted:#6b6b6b;
+  --rule:#d9d9d9;
+  --red:#444444;
+  --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+  --display:"Libre Caslon Display",Georgia,serif;
+  --sans:Inter,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit}
 
-  * { box-sizing: border-box; margin: 0; }
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: Inter, system-ui, sans-serif;
-    padding: clamp(24px, 5vw, 64px) 16px;
-    min-height: 100vh;
-  }
-  header {
-    max-width: 960px;
-    margin: 0 auto 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 16px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 20px;
-  }
-  h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.02em; }
-  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
-  .links { display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 9px 16px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--card);
-    color: var(--ink);
-    text-decoration: none;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 13px;
-    transition: border-color .15s ease, color .15s ease;
-  }
-  .btn:hover, .btn:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.primary:hover, .btn.primary:focus-visible { filter: brightness(1.08); color: #fff; }
+/* Top utility bar */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:12px;letter-spacing:.02em}
+.topbar a{text-decoration:none}
+.topbar a:hover{text-decoration:underline}
 
-  .grid {
-    max-width: 960px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
-  /* center the odd fifth poster under the pairs */
-  .grid figure:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: calc(50% - 12px);
-  }
+/* Masthead */
+.masthead{text-align:center;padding:26px 24px 14px}
+.masthead .name{font-family:var(--display);font-size:clamp(44px,7vw,84px);line-height:1;margin:0;font-weight:400;letter-spacing:.01em}
+.masthead .date{font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:12px}
 
-  figure {
-    position: relative;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px;
-    cursor: zoom-in;
-    transition: transform .2s ease, box-shadow .2s ease;
-  }
-  figure:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.12); }
+/* Section nav */
+.sections{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 26px;padding:12px 24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:13px;font-weight:500}
+.sections a{text-decoration:none}
+.sections a:hover,.sections a.current{text-decoration:underline;text-underline-offset:4px}
 
+/* Article header */
+article{max-width:1080px;margin:0 auto;padding:0 24px}
+.head{max-width:720px;margin:64px auto 40px;text-align:center}
+.rubric{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--red);text-decoration:none}
+.head h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,6vw,68px);line-height:1.05;margin:16px 0 18px}
+.dek{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.4;color:#333;margin:0 auto 22px;max-width:620px}
+.byline{font-family:var(--sans);font-size:13px;letter-spacing:.02em}
+.byline strong{font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.byline .meta{display:block;color:var(--muted);margin-top:6px;font-size:12px}
 
-  .frame {
-    aspect-ratio: 2 / 3;
-    border-radius: 6px;
-    overflow: hidden;
-    background: repeating-linear-gradient(45deg, var(--line) 0 1px, transparent 1px 10px);
-    display: grid;
-    place-items: center;
-  }
-  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .missing { color: var(--muted); font-size: 12px; font-family: "JetBrains Mono", monospace; }
+/* Body text */
+.body{max-width:640px;margin:0 auto 56px;font-size:20px;line-height:1.6}
+.body a{text-decoration-color:var(--red);text-underline-offset:3px}
 
-  figcaption {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 4px 4px;
-    font-size: 13px;
-  }
-  .step {
-    font-family: "JetBrains Mono", monospace;
-    color: var(--accent);
-    font-weight: 500;
-  }
-  .name { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 12px; }
+/* Sequence */
+.sequence{border-top:1px solid var(--ink);padding-top:28px}
+.seq-label{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;margin:0 0 28px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:56px 40px}
+.grid figure:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 20px)}
+figure{margin:0}
+figure img{width:100%;display:block;background:#f2f2f2}
+figcaption{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:baseline}
+.num{font-family:var(--sans);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--red);white-space:nowrap}
+.cap{font-family:var(--serif);font-size:17px;line-height:1.4;color:#333}
 
-  /* lightbox */
-  .lightbox {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.88);
-    display: none;
-    align-items: center; justify-content: center;
-    flex-direction: column; gap: 16px;
-    padding: 24px 16px;
-    z-index: 10;
-  }
-  .lightbox.open { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 82vh; border-radius: 6px; }
-  .lightbox .bar {
-    display: flex; gap: 24px; align-items: center;
-    color: #eee; font-family: "JetBrains Mono", monospace; font-size: 13px;
-  }
-  .lightbox button {
-    background: none; border: 1px solid #555; color: #eee;
-    border-radius: 999px; width: 38px; height: 38px;
-    font-size: 16px; cursor: pointer;
-  }
-  .lightbox button:hover { border-color: var(--accent); color: var(--accent); }
+/* End mark + footer */
+.end{text-align:center;margin:64px 0 0;font-size:22px}
+footer{margin-top:72px;border-top:1px solid var(--ink);padding:28px 24px 48px;text-align:center;font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.8}
+footer a{color:var(--ink)}
+
+/* Files */
+.files{display:flex;justify-content:center;flex-wrap:wrap;gap:16px 40px;font-family:var(--sans);font-size:16px;font-weight:400;margin:0 0 56px}
+.files a{text-underline-offset:4px}
+
+/* Posters */
+figure{cursor:zoom-in}
+.frame{aspect-ratio:2/3;overflow:hidden;background:#f2f2f2}
+.frame img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+figure:hover .frame img{opacity:.88}
+.missing{display:grid;place-items:center;height:100%;font-family:var(--sans);font-size:12px;color:var(--muted)}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(255,255,255,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 16px;z-index:10}
+.lightbox.open{display:flex}
+.lightbox img{max-width:100%;max-height:82vh;box-shadow:0 0 0 1px var(--rule)}
+.lightbox .bar{display:flex;gap:22px;align-items:center;font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--red)}
+.lightbox button{background:none;border:1px solid var(--ink);color:var(--ink);width:38px;height:38px;border-radius:50%;font-size:15px;cursor:pointer}
+.lightbox button:hover{background:var(--ink);color:#fff}
+
+@media(max-width:760px){
+  .grid figure:last-child:nth-child(odd){width:100%}
+  .grid{grid-template-columns:1fr;gap:44px}
+  .head{margin-top:44px}
+  .body{font-size:18px}
+  .topbar .hide-sm{display:none}
+}
 </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Posters</h1>
-      <p>5 generations · click any frame to enlarge · ← → to step through</p>
-    </div>
-    <nav class="links">
-      <a class="btn primary" href="skills.md" target="_blank" rel="noopener">skills.md ↗</a>
-      <a class="btn" href="handoff.md" target="_blank" rel="noopener">handoff.md ↗</a>
-    </nav>
-  </header>
 
-  <main class="grid" id="grid"></main>
+<nav class="sections">
+  <a href="index.html">← Back Home</a>
+</nav>
 
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
-    <img id="lbImg" alt="">
-    <div class="bar">
-      <button id="prev" aria-label="Previous">←</button>
-      <span id="lbLabel"></span>
-      <button id="next" aria-label="Next">→</button>
-      <button id="close" aria-label="Close">✕</button>
-    </div>
+<article>
+  <div class="head">
+    <a class="rubric" href="index.html">A.I. for Designers</a>
+    <h1>Poster Samples</h1>
+    <div class="byline"><span class="meta">Poster Generator Samples</span></div>
   </div>
+
+  <div class="files">
+    <a href="skills.md" target="_blank" rel="noopener">skills.md ↗</a>
+    <a href="handoff.md" target="_blank" rel="noopener">handoff.md ↗</a>
+  </div>
+
+  <section class="sequence">
+    <p class="seq-label">The Posters</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <p class="end">♦</p>
+</article>
+
+<footer>
+  Fiona Mei · A.I. for Designers · ART 3041, Fall 2026
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <img id="lbImg" alt="">
+  <div class="bar">
+    <button id="prev" aria-label="Previous">←</button>
+    <span id="lbLabel"></span>
+    <button id="next" aria-label="Next">→</button>
+    <button id="close" aria-label="Close">✕</button>
+  </div>
+</div>
 
 <script>
   const files = ["poster1.jpg", "poster2.jpg", "poster3.jpg", "poster4.jpg", "poster5.jpg"];
   const grid = document.getElementById("grid");
+  const pad = n => String(n).padStart(2, "0");
 
   files.forEach((src, i) => {
     const fig = document.createElement("figure");
     fig.innerHTML = `
-      <div class="frame">
-        <img src="${src}" alt="Generation ${i + 1}" loading="lazy">
-      </div>
-      <figcaption>
-        <span class="step">${String(i + 1).padStart(2, "0")} / ${String(files.length).padStart(2, "0")}</span>
-        <span class="name">${src}</span>
-      </figcaption>`;
+      <div class="frame"><img src="${src}" alt="Poster ${i + 1}" loading="lazy"></div>
+      <figcaption><span class="num">Poster ${pad(i + 1)}</span></figcaption>`;
     const img = fig.querySelector("img");
-    img.onerror = () => {
-      img.replaceWith(Object.assign(document.createElement("span"), {
-        className: "missing", textContent: `${src} not found`
-      }));
-    };
+    img.onerror = () => img.replaceWith(Object.assign(document.createElement("span"), {className: "missing", textContent: `${src} not found`}));
     fig.addEventListener("click", () => open(i));
     grid.appendChild(fig);
   });
@@ -199,8 +158,8 @@
   function open(i) {
     current = (i + files.length) % files.length;
     lbImg.src = files[current];
-    lbImg.alt = `Generation ${current + 1}`;
-    lbLabel.textContent = `${current + 1} / ${files.length} — ${files[current]}`;
+    lbImg.alt = `Poster ${current + 1}`;
+    lbLabel.textContent = `Poster ${pad(current + 1)} / ${pad(files.length)}`;
     lb.classList.add("open");
   }
   function close() { lb.classList.remove("open"); }
