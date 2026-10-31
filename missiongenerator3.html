@@ -1,5 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Baruch Mission Patch</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Baruch Mission Patch</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -210,6 +209,9 @@ input[type=file]{font-size:.82rem;color:var(--mute);max-width:100%}
       <label class="f" for="shape">Patch shape
         <select id="shape"></select>
       </label>
+      <label class="f" for="round" id="roundWrap">Corner rounding <span class="tnum" id="roundV" style="color:var(--ink)"></span>
+        <input type="range" id="round" min="0" max="250" step="5">
+      </label>
       <button class="btn primary" id="shuffle" type="button">Randomize layout</button>
       <p class="note" id="layName"></p>
       <label class="f" for="logoW">Bearcat size <span class="tnum" id="logoV"></span>
@@ -310,7 +312,7 @@ const LAYER_NAMES = {band:'Text band', background:'Background', orbits:'Orbit li
 const DEFLAYERS = () => Object.keys(LAYER_NAMES).map(id => ({id, on: true, op: 1}));
 const SIZES = [['stars', 'Stars', 50, 170], ['dots', 'Dot stars', 30, 300], ['streaks', 'Streaks', 30, 250], ['orbits', 'Orbit lines', 0, 400], ['accent', 'Accent', 50, 200], ['band', 'Text band', 70, 150], ['rule', 'Inner rule', 0, 300], ['border', 'Outer border', 20, 200]];
 const DEFSZ = () => Object.fromEntries(SIZES.map(([k]) => [k, 100]));
-const S = {palEdits:{}, palette:'baruch', shape:'circle', layers: DEFLAYERS(), top:'BARUCH COLLEGE', bot:'HELLO FROM 25TH STREET', topSize:56, botSize:56, logoW:420, sz:{}, lay:{...DEFLAY}, col:{...DEFCOL}, grid:false, actual:false};
+const S = {round:100, palEdits:{}, palette:'baruch', shape:'circle', layers: DEFLAYERS(), top:'BARUCH COLLEGE', bot:'HELLO FROM 25TH STREET', topSize:56, botSize:56, logoW:420, sz:{}, lay:{...DEFLAY}, col:{...DEFCOL}, grid:false, actual:false};
 // Every visit starts fresh: nothing is kept between visits, and anything an older version saved is cleared.
 try { Object.keys(localStorage).filter(k => k.startsWith('patch-')).forEach(k => localStorage.removeItem(k)); } catch(e) {}
 if (!S.sz || !Object.keys(S.sz).length) S.sz = DEFSZ();
@@ -340,23 +342,23 @@ const SHAPES = {
 };
 const shapeCache = new Map();
 function shapeAt(id, d){
-  const key = id + '|' + d.toFixed(2);
+  const key = id + '|' + d.toFixed(2) + '|' + S.round;
   if (shapeCache.has(key)) return shapeCache.get(key);
   const sh = SHAPES[id] || SHAPES.circle; let pts = [];
   if (!sh.v) {
     for (let i = 0; i < 720; i++) { const a = -Math.PI / 2 + i / 720 * 2 * Math.PI; let r = 525 - d;
-      if (sh.scallop && d < 30) r -= sh.scallop.depth * (1 - Math.cos(sh.scallop.n * (a + Math.PI / 2))) / 2;
+      if (sh.scallop && d < 30) r -= sh.scallop.depth * Math.max(0, 2 - S.round / 100) * (1 - Math.cos(sh.scallop.n * (a + Math.PI / 2))) / 2;
       pts.push([C + r * Math.cos(a), C + r * Math.sin(a)]); }
   } else {
     const V = sh.v.map(([x, y]) => [C + x * 525, C + y * 525]), n = V.length;
     const N = V.map((v, i) => { const w = V[(i + 1) % n], dx = w[0] - v[0], dy = w[1] - v[1], l = Math.hypot(dx, dy); return [-dy / l, dx / l]; });
     const W = V.map((v, i) => { const a = N[(i - 1 + n) % n], b = N[i], k = d / (1 + a[0] * b[0] + a[1] * b[1]); return [v[0] + (a[0] + b[0]) * k, v[1] + (a[1] + b[1]) * k]; });
     const corners = W.map((v, i) => {
-      const pv = W[(i - 1 + n) % n], nx = W[(i + 1) % n], r = Math.max(0, sh.r[i] * 525 - d, d > 35 && d < 112 ? 125 : 0); // text paths get softer corners
-      if (r < 1) return [v];
+      const pv = W[(i - 1 + n) % n], nx = W[(i + 1) % n], r0 = Math.max(0, sh.r[i] * 525 * S.round / 100 - d, d > 35 && d < 112 ? 125 : 0); // text paths get softer corners
+      if (r0 < 1) return [v];
       const l1 = Math.hypot(v[0] - pv[0], v[1] - pv[1]), l2 = Math.hypot(nx[0] - v[0], nx[1] - v[1]);
       const u1 = [(v[0] - pv[0]) / l1, (v[1] - pv[1]) / l1], u2 = [(nx[0] - v[0]) / l2, (nx[1] - v[1]) / l2];
-      const th = Math.acos(Math.max(-1, Math.min(1, -(u1[0] * u2[0] + u1[1] * u2[1])))), t = r / Math.tan(th / 2);
+      const th = Math.acos(Math.max(-1, Math.min(1, -(u1[0] * u2[0] + u1[1] * u2[1])))), r = Math.min(r0, Math.tan(th / 2) * Math.min(l1, l2) / 2 * .999), t = r / Math.tan(th / 2);
       const n1 = N[(i - 1 + n) % n], p1 = [v[0] - u1[0] * t, v[1] - u1[1] * t], p2 = [v[0] + u2[0] * t, v[1] + u2[1] * t];
       const c = [p1[0] + n1[0] * r, p1[1] + n1[1] * r];
       let a1 = Math.atan2(p1[1] - c[1], p1[0] - c[0]), a2 = Math.atan2(p2[1] - c[1], p2[0] - c[0]);
@@ -387,8 +389,9 @@ function shapeAt(id, d){
       for (let bIdx = 0; bIdx < 720; bIdx++) { const t = rad(bIdx / 2), dx = Math.cos(t), dy = Math.sin(t); let hit = 0;
         for (let i = 0; i < pts.length; i++) { const P = pts[i], Q = pts[(i + 1) % pts.length], ex = Q[0] - P[0], ey = Q[1] - P[1], den = dx * ey - dy * ex;
           if (Math.abs(den) < 1e-9) continue; const px = P[0] - C, py = P[1] - C, tt = (px * ey - py * ex) / den, u = (px * dy - py * dx) / den;
-          if (tt > 0 && u >= 0 && u <= 1) { hit = Math.max(hit, tt); } }
-        table[bIdx] = hit; } }
+          if (tt > 0 && u >= -1e-6 && u <= 1 + 1e-6) { hit = Math.max(hit, tt); } }
+        table[bIdx] = hit; }
+      for (let bIdx = 0; bIdx < 720; bIdx++) if (!table[bIdx]) table[bIdx] = table[(bIdx + 719) % 720] || table[(bIdx + 1) % 720]; }
     return table[Math.round((((deg % 360) + 360) % 360) * 2) % 720];
   };
   let A2 = 0, gx = 0, gy = 0;
@@ -514,6 +517,24 @@ function build(L){
     for (let t = 0; t < 900 && n < 8; t++) { const a = Rs() * 360, r = 225 + Rs() * 125, z = (22 + Rs() * 14) * SS, [x, y] = polar(a, wr(a, r)), gap = t < 600 ? 115 : 80;
       if (stars.some(s => Math.hypot(s.x - x, s.y - y) < gap)) continue;
       if (clear(x, y, z)) { stars.push({x, y, R: z, rot: JS(14), msg: false}); n++; } }
+  }
+
+  // fill pass: wherever the shape still has a large empty area, add a smaller star there
+  {
+    const gapWanted = 112 * Math.max(.75, SS), z = 22 * SS;
+    for (let n = 0; n < 10; n++) {
+      let best = null, bestD = 0;
+      for (let t = 0; t < 300; t++) {
+        const a = Rs() * 360, r = Math.sqrt(Rs()) * RF, [x, y] = polar(a, wr(a, r));
+        if (!clear(x, y, z)) continue;
+        const logoD = (Math.hypot((x - BODY.x) / (lw * .46), (y - BODY.y) / (lh * .46)) - 1) * Math.min(lw, lh) * .46;
+        const edgeD = (FR(angOf(x, y)) - Math.hypot(x - C, y - C)) * 1.6;
+        const d = Math.min(logoD, edgeD, ...stars.map(st => Math.hypot(st.x - x, st.y - y) - st.R), ...obs.map(o => Math.hypot(o.x - x, o.y - y) - o.R));
+        if (d > bestD) { bestD = d; best = [x, y]; }
+      }
+      if (!best || bestD < gapWanted) break;
+      stars.push({x: best[0], y: best[1], R: z * (.85 + Rs() * .3), rot: JS(12), msg: false});
+    }
   }
 
   // streaks
@@ -735,6 +756,7 @@ function render(){
   $('patch').setAttribute('data-seed', S.lay.seed);
   $('layName').textContent = `Current layout: ${verName(S.lay)}. Each click switches to a different style: background, ring, border, decorations and stars all change.`;
   ui();
+  if (typeof schedulePrebuild === 'function') schedulePrebuild();
 }
 function arcStatus(str, L, want){
   if (!str) return ['Empty, this arc will be blank', 'warn'];
@@ -825,11 +847,21 @@ function pdfFromJpeg(jpg, px){
   push(`trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n${xr}\n%%EOF\n`);
   return new Blob(parts, {type: 'application/pdf'});
 }
-async function getDl(){
-  if (dl) return dl;
-  for (let i = 0; i < 50 && !(window.claude && typeof window.claude.use === 'function'); i++) await new Promise(r => setTimeout(r, 100));
-  if (window.claude && typeof window.claude.use === 'function') { try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; } }
-  return dl;
+// Inside Claude, files go through Claude's save prompt. Opened as a plain HTML file, the browser downloads them directly.
+let dlPromise = null;
+function getDl(){
+  if (!dlPromise) dlPromise = (async () => {
+    for (let i = 0; i < 30 && !(window.claude && typeof window.claude.use === 'function'); i++) await new Promise(r => setTimeout(r, 100));
+    if (window.claude && typeof window.claude.use === 'function') { try { return await window.claude.use('downloads'); } catch (e) { return null; } }
+    return null;
+  })();
+  return dlPromise;
+}
+const insideClaude = () => !!(window.claude && typeof window.claude.use === 'function');
+function browserDownload(filename, blob){
+  try { const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); return true; }
+  catch (e) { return false; }
 }
 let outUrl = null;
 function showOut(blob, hint){
@@ -842,7 +874,16 @@ async function save(filename, data, preview){
     if (preview) showOut(preview, `${why} Right-click the image (or press and hold on a phone) and choose Save Image to keep it.` + (filename.endsWith('.pdf') ? ' This preview saves as a PNG; a PDF needs the download to go through.' : ''));
     else setStatus(`${why} Export the PNG instead and save it from the preview.`);
   };
-  if (!d) { setStatus(''); fallback('This view can’t save files directly.'); return; }
+  if (!d) {
+    if (!insideClaude()) {
+      const ok = browserDownload(filename, data);
+      setStatus(ok ? `Downloaded ${filename}. Check your Downloads folder.` : '');
+      if (preview) showOut(preview, `${ok ? 'If the file didn’t download, right-click' : 'Your browser blocked the download. Right-click'} the image (or press and hold on a phone) and choose Save Image.` + (filename.endsWith('.pdf') ? ' The preview saves as a PNG.' : ''));
+      return;
+    }
+    setStatus(''); fallback('Direct downloads aren’t available in this view (for example, a preview inside a chat). Open the patch generator from your artifacts on claude.ai to download files.'); return;
+  }
+  setStatus(`Confirm the download of ${filename} in the prompt.`);
   try { const r = await d.save({filename, data}); $('expOut').hidden = true; setStatus(r && r.status === 'delivered' ? `Sent ${filename}.` : `Saved ${filename}. Check your Downloads folder.`); }
   catch (e) {
     const code = e && e.code;
@@ -858,16 +899,35 @@ async function busy(fn){
 }
 const pngBlob = async () => new Blob([withDpi(await (await toBlob(await raster(1050, false), 'image/png')).arrayBuffer(), 300)], {type: 'image/png'});
 const pdfBlob = async () => { const cv = await raster(2100, true); return pdfFromJpeg(new Uint8Array(await (await toBlob(cv, 'image/jpeg', .95)).arrayBuffer()), 2100); };
-$('xSvg').onclick = () => busy(async () => { const b = new Blob([svgFile(true)], {type: 'image/svg+xml'}); await save('patch.svg', b, b); });
-$('xPng').onclick = () => busy(async () => { const b = await pngBlob(); await save('patch.png', b, b); });
-$('xPdf').onclick = () => busy(async () => { const b = await pdfBlob(); await save('patch.pdf', b, await pngBlob()); });
+// Files are built in the background after each change, so a click can open the save prompt right away.
+const stateKey = () => JSON.stringify([S, catKey]);
+let prebuilt = {key: '', files: {}}, pbTimer = null;
+const makers = {svg: async () => new Blob([svgFile(true)], {type: 'image/svg+xml'}), png: pngBlob, pdf: pdfBlob};
+async function fileFor(kind){
+  const key = stateKey();
+  if (prebuilt.key !== key) prebuilt = {key, files: {}};
+  if (!prebuilt.files[kind]) { const b = await makers[kind](); if (stateKey() === key) prebuilt.files[kind] = b; return b; }
+  return prebuilt.files[kind];
+}
+function schedulePrebuild(){
+  clearTimeout(pbTimer);
+  pbTimer = setTimeout(async () => { if (exporting || !(T.top || T.bot) || !T.topL.ok || !T.msgL.ok) return;
+    try { for (const k of ['svg', 'png', 'pdf']) { if (exporting) return; await fileFor(k); } } catch (e) {} }, 800);
+}
+const doExport = kind => busy(async () => { const b = await fileFor(kind); await save(`patch.${kind}`, b, kind === 'pdf' ? await fileFor('png') : b); });
+$('xSvg').onclick = () => doExport('svg');
+$('xPng').onclick = () => doExport('png');
+$('xPdf').onclick = () => doExport('pdf');
 
 /* ---------- controls ---------- */
 $('bcImg').setAttribute('href', BEARCAT);
 $('shape').innerHTML = Object.entries(SHAPES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('');
 if (!SHAPES[S.shape]) S.shape = 'circle';
 $('shape').value = S.shape;
-$('shape').onchange = () => { S.shape = $('shape').value; render(); };
+const roundUI = () => { $('roundWrap').hidden = S.shape === 'circle'; $('roundWrap').firstChild.textContent = S.shape === 'seal' ? 'Edge smoothing ' : 'Corner rounding '; $('roundV').textContent = `${S.round}%`; };
+$('shape').onchange = () => { S.shape = $('shape').value; roundUI(); render(); };
+$('round').value = S.round; $('round').addEventListener('input', () => { S.round = +$('round').value; roundUI(); render(); });
+roundUI();
 ['top', 'bot'].forEach(k => { const el = $(k === 'top' ? 'tTop' : 'tBot'); el.value = S[k]; el.addEventListener('input', () => { S[k] = el.value; render(); }); });
 [['zTop', 'topSize'], ['zBot', 'botSize']].forEach(([id, k]) => { $(id).value = S[k]; $(id).addEventListener('input', () => { S[k] = +$(id).value; render(); }); });
 function swatches(){
@@ -939,5 +999,4 @@ Promise.all([document.fonts.load(`700 56px "Space Grotesk"`), document.fonts.loa
 getDl();
 })();
 </script>
-
 </body></html>
